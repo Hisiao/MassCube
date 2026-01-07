@@ -124,12 +124,20 @@ async def sat_state(time: Optional[str] = None) -> OrbitState:
 
 @app.get("/sat/track", response_model=List[TrackPoint])
 async def sat_track(start: Optional[str] = None, end: Optional[str] = None, step: Optional[int] = None) -> List[TrackPoint]:
-    start_dt = _parse_time(start)
-    end_dt = _parse_time(end) if end else start_dt + timedelta(seconds=config_store.config.orbits.prediction_horizon_sec)
+    if start is None and end is None:
+        now = datetime.now(timezone.utc)
+        half = config_store.config.ui.track_length_sec / 2
+        start_dt = now - timedelta(seconds=half)
+        end_dt = now + timedelta(seconds=half)
+        tle_ref = now
+    else:
+        start_dt = _parse_time(start)
+        end_dt = _parse_time(end) if end else start_dt + timedelta(seconds=config_store.config.orbits.prediction_horizon_sec)
+        tle_ref = start_dt
     step_sec = step or config_store.config.orbits.track_step_sec
     if end_dt <= start_dt:
         raise HTTPException(status_code=400, detail="end must be after start")
-    tle = await _get_best_tle(start_dt)
+    tle = await _get_best_tle(tle_ref)
     if not tle:
         raise HTTPException(status_code=503, detail="No TLE available")
     return orbit_service.track(tle, start_dt, end_dt, step_sec)

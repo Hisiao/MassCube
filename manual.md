@@ -3,9 +3,10 @@
 ## 整体逻辑长话短说
 - 框架：用 FastAPI 提供一组 HTTP 接口，便于浏览器或前端调用。
 - 配置：启动时读取 `config/config.yaml`，变更会在内存里热加载，并写入版本日志 `config/config_versions.json`。
-- TLE 获取：后台循环定期从 CelesTrak 拉取目标星（默认 NORAD 65490）的 TLE，失败则用内置 mock；同时把结果存入 SQLite `data/tle_history.db`。
+- TLE 获取：后台循环优先从官方 TLE 源（http://8.141.94.91/tle/ty47.txt）拉取目标星（默认 NORAD 65488）的 TLE，失败则降级 CelesTrak，仍失败才用内置 mock；同时把结果存入 SQLite `data/tle_history.db`。
 - 质量评估：每条新 TLE 都按新鲜度、轨道要素跳变、传播偏差打分，生成 `score` 和 `warnings`。
-- 轨道计算：`OrbitService` 用 SGP4 把 TLE 传播到指定时间，输出经纬度、高度、速度。
+- 轨道计算：`OrbitService` 用 SGP4 把 TLE 传播到指定时间，优先使用 `pymap3d.teme2ecef`（若不可用则用 `eci2ecef` 或 GMST 退化实现），再转换经纬度、高度、速度。
+- 时间基准：所有轨道计算均按 UTC 时间；与外部网站对比需统一时间基准。
 - 辐射通量：当前用 mock 模型，按高度生成各能道的粒子通量时间序列。
 - 决策窗口：把通量映射为风险值，结合阈值、提前/滞后时间和最短保持时间，给出观测 ON/OFF 窗口。
 
@@ -33,6 +34,23 @@ uvicorn app.main:app --reload --port 8000
 - 配置查看/修改：
   - GET `/config` 查看当前配置与版本。
   - PUT `/config` 提交完整 JSON（与 `config/config.yaml` 结构一致）即可热更新；保存的版本会写入 `config/config_versions.json`。
+
+## 前端（Vite + React + Cesium）使用
+1) 安装 Node.js 18+，进入 `frontend/` 安装依赖：
+```
+cd frontend
+npm install
+```
+2) 开发/预览：
+```
+npm run dev    # 默认 http://127.0.0.1:5173
+```
+如需指向远程后端，可在 `frontend/.env` 中设置 `VITE_API_BASE=http://<backend>:8000`（默认本机）。
+3) 页面布局与交互：
+- 左侧：实时状态面板 + 参数配置（与 `/config` 对齐），可修改阈值/权重/分位等并“保存并应用”（PUT /config）。当前版本号和刷新状态显示在底部。
+- 观测窗口：按时间列出 OBS_ON/OFF 段（来自 `/decision/windows`）。
+- 右侧：Cesium 3D 地球，蓝绿橙轨迹按风险渐变，白色点为当前卫星位置，悬停显示坐标/高度。
+- 数据刷新：默认每 15 秒自动轮询 state/track/flux/windows；保存配置后会立即重新拉取。
 
 ## 重要文件速览
 - `app/main.py`：FastAPI 入口、路由与后台 TLE 刷新任务。

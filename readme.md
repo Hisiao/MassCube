@@ -1,160 +1,231 @@
-你是一名资深航天任务软件工程师 + 后端架构师 + 科学计算工程师。请为一个卫星任务（NORAD ID = 65490，COSPAR = 2025-197C）生成可运行的工程代码（以生产可用为目标），实现从 Space-Track 获取 TLE、用 SGP4 生成实时轨道、再计算电子/质子通量风险并输出观测规避/关机窗口，同时提供可视化所需的数据接口。
+你是一名资深航天任务软件工程师 + 全栈工程师。请生成一个端到端可运行的工程项目：后端负责从官方 TLE 源（http://8.141.94.91/tle/ty47.txt）获取 TLE（必要时降级 CelesTrak）、SGP4 传播轨道、计算电子/质子通量风险并生成观测规避/关机窗口；前端提供一个真实可用网页：左侧为参数配置与实时坐标面板，右侧为 3D 地球视图，用户能直观看到卫星位置/轨迹，并能调参让决策与可视化即时变化。
 
-0. 目标与约束
+0. 背景与目标
 
-目标：保障 0.1–10 MeV 伽马谱线观测不受高通量背景影响；当进入高通量区（范艾伦辐射带等）时可自动规避并控制载荷关机。
+卫星：NORAD ID = 65488，COSPAR = 2025-197C
 
-轨道来源：TLE/SGP4（高精度上限受 TLE 限制，因此必须输出“轨道质量/不确定性提示”，并把不确定性转化为安全裕度）。
+轨道：官方 TLE 源（http://8.141.94.91/tle/ty47.txt）/CelesTrak → SGP4 传播 → 实时位置/轨迹（含未来预测）
 
-通量模型：以 AE9/AP9/SPM（IRENE）为主，但考虑到环境依赖复杂，代码结构必须允许：
+环境：电子/质子通量用于保障 0.1–10 MeV 伽马谱线观测；进入高通量区（范艾伦辐射带相关高风险）时控制载荷关机
 
-真正对接 IRENE（外部可执行文件或库调用）
+关键要求：阈值、权重、滞回、提前/延后时间、触发器、裕度放大因子全部配置化，并可通过网页修改，后端热更新立即生效（含版本号与回滚）。
 
-先用 Mock/占位实现（返回可控的通量值，用于联调 UI/决策）
+1) 交付物（必须全部提供）
+1.1 项目结构
 
-关键要求：所有阈值、权重、滞回、提前/延后时间、模式切换条件，都必须放在配置文件中，并提供运行时热更新接口（例如 REST API 修改后即时生效，且可回滚）。
+输出一个完整 repo 结构（多文件），包含：
 
-1. 系统架构（必须按模块实现）
+backend/（Python + FastAPI）
 
-实现一个最小可用但可扩展的服务端系统（建议 Python）：
+frontend/（Vite + React + TypeScript）
 
-1.1 tle_service
+docker-compose.yml（建议） + .env.example
 
-主源：Space-Track（需要用户名/密码/令牌等，从环境变量读取）。
+README.md（从零启动：一键运行后访问网页）
 
-备源：CelesTrak（当主源失败/超时/限流时自动降级）。
+1.2 后端（FastAPI）
 
-功能：
+必须实现模块化服务（同进程也可，但代码结构要分层清晰）：
 
-按 NORAD=65490 拉取最新 TLE，并保存历史（建议最近 14 天）。
+1) tle_service
 
-TLE 质量门控（必须实现评分/告警）：
+主源：官方 TLE 源（http://8.141.94.91/tle/ty47.txt）
 
-行校验和与解析完整性
+备源：CelesTrak（主源失败自动降级）
 
-新鲜度：now-epoch 超阈值则降分/告警
+拉取：默认 900 秒（可配置），当前未提供手动触发 endpoint
 
-与上一条对比：关键要素变化异常告警（平均运动、倾角、RAAN、偏心率等）
+保存：最近 14 天历史
 
-传播偏差检查：旧 TLE 外推到新 epoch 与新 TLE 在同一时刻状态差超阈值告警
+TLE 质量门控与评分（必须实现并对外暴露）：
 
-输出：标准化对象 TLESet（包含 source、fetched_at、epoch、score、警告列表等）
+行校验和/解析完整性
 
-1.2 orbit_service
+新鲜度 now-epoch 阈值
 
-使用 Vallado SGP4 实现（python-sgp4）。
+要素变化阈值（与上一条相比）
 
-关键点：
+传播偏差阈值（旧 TLE 外推到新 epoch 与新 TLE 差异）
 
-“按时间选最优 TLE”：对任意时刻 t，选择 epoch 最接近且评分最高的 TLE 来传播，而不是永远用最新。
+输出标准化对象 TLESet（source, fetched_at, epoch, score, warnings[]）
 
-坐标转换：必须把 SGP4 输出的 TEME 正确转换到 ECEF/经纬高（允许使用成熟库/实现，但要写清楚依赖与验证方法）。
+2) orbit_service
+
+使用 Vallado SGP4（python-sgp4）
+
+必须实现“按时间选最优 TLE”：对任意时刻 t，选 epoch 最近且评分最高的 TLE
+
+坐标转换：TEME → ECEF → LLA（经纬高），优先使用 pymap3d.teme2ecef + ecef2geodetic；若库不支持则回退到 eci2ecef/GMST（无外部 EOP 数据）
 
 输出：
 
-实时状态：State(t, lat, lon, alt, v, tle_epoch, orbit_quality)
+实时状态：State(t, lat, lon, alt_km, vel, tle_epoch, orbit_quality)
 
-轨迹点串：用于前端（JSON 或 CZML）
+轨迹：TrackPoint[]（过去/未来，步长可配）
 
-1.3 flux_service
+可选：CZML 用于 Cesium 动画
 
-输入：轨道状态串（时间、位置、高度）以及用户选择的能段/通量定义。
-
-输出：电子/质子通量 + 风险值 Risk（可解释）
-
-实现方式：
+3) flux_service
 
 抽象接口 FluxModel：
 
-AE9AP9Model（真实对接 IRENE 的适配器，允许先留 TODO）
+MockFluxModel（必须实现、默认启用）
 
-MockFluxModel（可配置的假数据/区域模型，用于先跑通全链路）
+AE9AP9Model（对接 IRENE 的适配器允许先 TODO，但接口与配置必须完整）
 
-能段：至少支持以下积分通量（可配置添加更多）：
+能段（至少支持，且可配置扩展）：
 
 电子：Je>100keV、Je>1MeV
 
-质子：Jp>10MeV、Jp>50MeV（可选）
+质子：Jp>10MeV、Jp>50MeV（可选项）
 
-支持分位数/情景：默认 Mean，可切 P95；当空间天气触发器生效时自动切更保守分位数（仍允许用户手动覆盖）。
+支持分位数/情景：Mean / P95（Mock 也要模拟该切换）
 
-1.4 decision_service（核心）
+4) decision_service（核心）
 
-输入：flux_timeseries + orbit_quality + 外部空间天气触发器状态（例如 Kp）
+风险分数（必须实现且可配置）：
 
-输出：
+Risk = Σ wi * (Ji^0.1)
 
-观测窗口/关机窗口：[t_start, t_end, mode=OBS_ON/OFF, reason, margins]
+wi、Ji 列表可配置（用户可在网页选择哪些通量参与 Risk）
 
-可直接喂给“指令生成器”的 command_timeline（先用 JSON 表达即可）
+两级阈值 + 滞回 + 防抖（全部可配置）：
 
-决策规则（必须实现且全部可配置）：
+R_off、R_on
 
-风险分数：
+hold_time
 
-Risk = Σ wi * log10(Ji)（wi 可配置，Ji 选择哪些通量也可配置）
+min_off_time、min_on_time
 
-两级阈值 + 滞回：
+安全裕度（全部可配置）：
 
-Risk > R_off 进入保护（关机/停止观测）
+lead_time（提前关机）
 
-Risk < R_on 且持续 hold_time 才允许恢复
+lag_time（延后开机）
 
-min_off_time、min_on_time 防抖
-
-安全裕度：
-
-lead_time 提前关机
-
-lag_time 延后开机
-
-当 orbit_quality 变差或空间天气触发器为真时：自动放大裕度（例如 *2）
+orbit_quality 差或触发器开 → 裕度放大 factor（可配置）
 
 Fail-safe：
 
-当 TLE 质量告警/疑似机动：缩短预测窗口、强制更保守分位数、并在输出中标记“轨道不确定”。
+轨道不确定时：缩短预测窗口（如 24h→12h），切保守分位数，输出 reason 标记
 
-2. 可配置与热更新（强制）
+输出：
 
-必须实现统一配置系统（推荐 YAML/JSON + 环境变量覆盖）：
+DecisionWindow[]（OBS_ON/OFF、原因、裕度）
 
-orbits: 刷新率、未来预测时长、历史窗口时长、TEME->ECEF 方法开关等
+command_timeline（JSON 即可，后续可接你们指令系统）
 
-tle_quality: 新鲜度阈值、要素变化阈值、传播偏差阈值、评分权重
+1.3 配置系统（强制）
 
-flux: 能段列表、分位数默认值、模型选择（AE9/AP9 或 Mock）
+配置文件：config.yaml（或 json），并提供 schema 校验（Pydantic）
 
-decision: Risk 权重 wi、R_off/R_on、hold_time、min_on/off、lead/lag、放大因子、触发器阈值（Kp 等）
+API：
 
-ui: 轨迹长度、采样间隔、色条范围（可选）
+GET /config
 
-并提供 API：
+PUT /config：更新后立即生效，返回新版本号；支持回滚（保存历史版本）
 
-GET /config 查看当前配置
+后端所有阈值/权重/时间参数严禁硬编码
 
-PUT /config 更新配置（带 schema 校验 + 版本号 + 回滚能力）
+1.4 对外 API（至少）
 
-所有服务读取同一份配置（或通过配置服务下发），更新后立即生效。
+GET /sat/state（默认返回“当前时刻”实时坐标；也支持传 time）
 
-3. 数据接口（给前端动态显示用）
+GET /sat/track?start&end&step
 
-至少提供：
+GET /env/flux/track?start&end&step
 
-GET /sat/state?time=... 返回某时刻卫星位置与质量指标
+GET /decision/windows?start&end
 
-GET /sat/track?start=...&end=...&step=... 返回轨迹点串
+可选实时推送：WebSocket /ws/live（每 1–5 秒推送 state/flux/decision 概要）
 
-GET /env/flux/track?... 返回沿轨通量与 Risk 时间序列
+2) 前端网页（必须真实可用）
 
-GET /decision/windows?... 返回观测 ON/OFF 窗口
+技术栈：Vite + React + TS，3D 地球：CesiumJS。
 
-可选：GET /env/tiles?... 返回全球热力图瓦片索引（先可 stub）
+2.1 页面布局（强制）
 
-4. 默认参数（必须写入配置，且易于用户修改）
+左侧侧栏（固定宽度）：参数配置 + 实时坐标信息
 
-给出一套“保守但可用”的默认值（用户可调整）：
+右侧主视图（占满剩余空间）：Cesium 3D 地球视图
+
+2.2 左侧侧栏必须包含
+A) 实时坐标面板（置顶）
+
+实时显示（每 1–5 秒更新）：
+
+当前时间（UTC 和本地可选）
+
+纬度/经度/高度（km）
+
+速度（可选）
+
+当前使用的 TLE epoch、TLE score、warnings 数量
+
+当前模式：OBS_ON / OBS_OFF
+
+若 OFF：显示 reason + 预计下次恢复时间（来自 windows）
+
+B) 参数配置区（可滚动）
+
+必须实现可编辑并应用的参数（全部来自 /config）：
+
+Risk 权重 wi（对每个通量项提供滑杆 + 数值输入）
+
+选择参与 Risk 的通量项（勾选 Je100/Je1/Jp10/Jp50）
+
+R_off / R_on
+
+hold_time、min_off_time、min_on_time
+
+lead_time、lag_time、放大因子 factor
+
+分位数：Mean/P95
+
+“轨道不确定/触发器时自动更保守”的开关（允许用户覆盖）
+按钮（强制）：
+
+“保存并应用”（PUT /config）
+
+“撤销未保存修改”
+
+“恢复默认值”（恢复到 config 初始默认）
+并显示：
+
+当前配置版本号
+
+最近一次应用时间
+每个参数旁边必须有 tooltip/帮助文本说明其含义。
+
+C) 简要窗口条带（可选但推荐）
+
+显示未来 24h 的 OBS_OFF 窗口条带（小型甘特条/时间条）
+
+2.3 右侧 Cesium 3D 地球必须包含
+
+卫星当前位置 marker
+
+过去/未来轨迹（默认 ±90 分钟，可配置）
+
+轨迹按 Risk（或用户选择的通量项）着色，并显示图例（color legend）
+
+可切换：显示/隐藏轨迹、显示/隐藏风险着色
+
+点击轨迹点：弹出该时刻的 lat/lon/alt + Risk + 主要通量值
+
+2.4 数据刷新与交互
+
+首次加载：拉取 /config、/sat/track、/env/flux/track、/decision/windows
+
+实时模式：轮询或 WebSocket 更新 state，并适当刷新 track/flux（例如每 30–60 秒刷新一次预测段）
+
+调参后：PUT /config 成功 → 立即重新拉取 track/flux/windows 并更新 Cesium 着色
+
+3) 默认配置（必须给出，可直接跑）
 
 预测窗口：24h（轨道不确定时降到 12h）
+
+轨迹显示：过去 90 分钟 + 未来 90 分钟
 
 lead_time：3 分钟；lag_time：6 分钟
 
@@ -162,40 +233,28 @@ hold_time：120 秒
 
 min_off_time：10 分钟；min_on_time：10 分钟
 
-分位数：默认 Mean；触发器开启时切 P95
+裕度放大 factor：2.0
 
-Risk 权重：默认给一组合理初值（明确写在配置里，并解释意义）
+flux 模型：默认 Mock
 
-放大因子：orbit_quality 差或触发器开 → lead/lag *2
+Risk 权重与阈值：给出保守初值并注释
 
-5. 工程交付与质量要求
+4) 运行与质量要求
 
-输出一个完整项目结构（例如 FastAPI + Uvicorn），含：
+必须提供 docker-compose 一键启动（或清晰的本地启动方式）
 
-依赖清单、README、配置示例、启动方式
+必须可在本地打开网页看到 3D 地球与卫星轨迹
 
-数据模型（Pydantic/dataclass）
+必须能在网页改参数并立即影响 OBS 窗口与轨迹着色
 
-日志（结构化日志，记录 TLE source、epoch、score、决策原因）
+后端要有最小单元测试：TLE 评分、TLE 选择、决策滞回/防抖、裕度放大
 
-健康检查：/healthz
+5) 输出要求
 
-单元测试：至少覆盖
+输出完整代码与文件树（多文件）
 
-TLE 校验与评分
+不要只给伪代码
 
-“按时间选最优 TLE”的选择逻辑
+不要把参数写死
 
-决策滞回、防抖、lead/lag 行为
-
-必须清晰标注哪些部分是 Mock，如何切换到真实 AE9/AP9。
-
-6. 不能做的事
-
-不要把任何阈值/权重写死在代码里（必须配置化）。
-
-不要只输出伪代码；要输出可运行的工程代码与文件结构。
-
-不要省略坐标转换验证说明与最小测试。
-
-如果你对输出语言/框架需要我指定：请默认 Python + FastAPI；后台任务用 APScheduler 或 Celery（二选一即可）；配置用 YAML + schema 校验；存储可以先用 SQLite/PostgreSQL 任选其一（给出可替换接口）；缓存可选 Redis（没有也要能跑）。
+在 README 中写明：如何切换 Mock/IRENE、如何解释每个参数对观测策略的影响（当前不使用 Space-Track 账号）

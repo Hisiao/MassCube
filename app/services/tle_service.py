@@ -21,7 +21,7 @@ DB_PATH = Path("data/tle_history.db")
 
 @dataclass
 class TLESourceConfig:
-    primary_url: str = "https://www.space-track.org"
+    primary_url: str = "http://8.141.94.91/tle/ty47.txt"
     fallback_url: str = "https://celestrak.org/NORAD/elements/gp.php"
     primary_user: Optional[str] = None
     primary_password: Optional[str] = None
@@ -177,7 +177,7 @@ class TLEQuality:
 
 
 class TLEService:
-    def __init__(self, repo: TLERepository, quality: TLEQuality, norad_id: int = 65490, source_cfg: TLESourceConfig = TLESourceConfig()):
+    def __init__(self, repo: TLERepository, quality: TLEQuality, norad_id: int = 65488, source_cfg: TLESourceConfig = TLESourceConfig()):
         self.repo = repo
         self.quality = quality
         self.norad_id = norad_id
@@ -197,16 +197,26 @@ class TLEService:
 
     async def _fetch(self) -> TLESet:
         now = datetime.now(timezone.utc)
+        warnings: List[str] = []
         try:
-            tle_lines = await self._fetch_from_celestrak(self.norad_id)
-            source = "celestrak"
+            tle_lines = await self._fetch_from_official()
+            source = "official"
+            try:
+                alt_lines = await self._fetch_from_celestrak(self.norad_id)
+                warnings.extend(self._compare_sources(tle_lines, alt_lines))
+            except Exception:
+                warnings.append("CelesTrak fallback unavailable for consistency check")
         except Exception:
-            # fallback mock TLE placeholder
-            tle_lines = (
-                "1 25544U 98067A   25005.51000000  .00016717  00000+0  10270-3 0  9991",
-                "2 25544  51.6428  43.5905 0006786 306.3418  53.6891 15.50355749442124",
-            )
-            source = "mock"
+            try:
+                tle_lines = await self._fetch_from_celestrak(self.norad_id)
+                source = "celestrak"
+            except Exception:
+                # fallback mock TLE placeholder
+                tle_lines = (
+                    "1 25544U 98067A   25005.51000000  .00016717  00000+0  10270-3 0  9991",
+                    "2 25544  51.6428  43.5905 0006786 306.3418  53.6891 15.50355749442124",
+                )
+                source = "mock"
 
         sat = Satrec.twoline2rv(tle_lines[0], tle_lines[1], WGS72)
         tle_epoch = self._sgp4_epoch_to_datetime(sat)
@@ -218,7 +228,7 @@ class TLEService:
             line1=tle_lines[0],
             line2=tle_lines[1],
             score=1.0,
-            warnings=[],
+            warnings=warnings,
         )
 
     async def _fetch_from_celestrak(self, norad_id: int) -> Tuple[str, str]:
@@ -230,6 +240,34 @@ class TLEService:
         if len(lines) < 2:
             raise RuntimeError("TLE not found")
         return lines[0], lines[1]
+
+    async def _fetch_from_official(self) -> Tuple[str, str]:
+        url = self.source_cfg.primary_url
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+        lines = [ln.strip() for ln in resp.text.splitlines() if ln.strip().startswith(("1 ", "2 "))]
+        if len(lines) < 2:
+            raise RuntimeError("Official TLE not found")
+        return lines[0], lines[1]
+
+    def _compare_sources(self, primary: Tuple[str, str], secondary: Tuple[str, str]) -> List[str]:
+        warnings: List[str] = []
+        primary_num = self._extract_satnum(primary[0])
+        secondary_num = self._extract_satnum(secondary[0])
+        if primary_num != secondary_num or primary_num != self.norad_id:
+            warnings.append(f"NORAD mismatch primary={primary_num} secondary={secondary_num} expected={self.norad_id}")
+            return warnings
+        if primary != secondary:
+            warnings.append("Official vs CelesTrak TLE lines differ")
+        return warnings
+
+    @staticmethod
+    def _extract_satnum(line1: str) -> Optional[int]:
+        try:
+            return int(line1[2:7])
+        except Exception:
+            return None
 
     def select_for_time(self, t: datetime, history_days: int) -> Optional[TLESet]:
         candidates = self.repo.list_recent(self.norad_id, history_days)

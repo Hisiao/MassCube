@@ -5,8 +5,8 @@
 - `app/config.py`：统一配置模型，YAML 读写与版本化、热更新接口。
 - `app/models.py`：Pydantic 数据模型（TLE、状态、通量、风险、窗口等）。
 - `app/services/`：模块化服务
-  - `tle_service.py`：Space-Track/CelesTrak 拉取（含降级 mock）、质量评估、历史存储（SQLite）。
-  - `orbit_service.py`：SGP4 传播，TEME→ECEF→经纬高。
+  - `tle_service.py`：官方 TLE 源（http://8.141.94.91/tle/ty47.txt）优先，CelesTrak 备源（含降级 mock）、质量评估、历史存储（SQLite）。
+  - `orbit_service.py`：SGP4 传播，TEME→ECEF→经纬高（优先 pymap3d.teme2ecef，不支持时回退 eci2ecef/GMST）。
   - `flux_service.py`：可插拔通量模型（mock/AE9AP9 stub）。
   - `decision_service.py`：Risk 计算、阈值/迟滞/防抖、lead/lag 窗口。
 - `config/config.yaml`：默认可运行配置，可通过 API 热更新；`config.example.yaml` 作为模版。
@@ -35,7 +35,7 @@ uvicorn app.main:app --reload --port 8000
 - 环境变量暂不内置覆盖，保持文件 + API 一致性，便于外部配置中心接管。
 
 ## TLE 管线
-- 默认尝试 CelesTrak 拉取，失败时降级内置 mock TLE；后续可按需补充 Space-Track 登录/令牌。
+- 默认尝试官方 TLE 源（http://8.141.94.91/tle/ty47.txt），失败时降级 CelesTrak，再失败则用内置 mock TLE。
 - 质量评估：新鲜度、轨道要素跳变、传播偏差（均可配置权重/阈值），生成 `score` 和 `warnings`。
 - 历史：SQLite `data/tle_history.db`，`list_recent` 自动按配置天数筛选；按时间/评分选择最优 TLE。
 
@@ -51,5 +51,5 @@ python -m pytest
 
 ## 后续对接（标记 TODO）
 - 将 `flux.model` 切换为 AE9/AP9 IRENE 适配器时，替换 `FluxService._build_model` 中的 stub。
-- Space-Track 主源登录与速率控制；完善传播偏差度量与 TLE 推演比对。
+- 如需接入其他源，可在 `TLESourceConfig` 中新增或替换主源；完善传播偏差度量与 TLE 推演比对。
 - 增强 config API：提供单版本回滚接口、schema 详情、差异预览。

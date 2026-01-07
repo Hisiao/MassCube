@@ -50,7 +50,7 @@ decision:
   trigger_kp_threshold: 6
 
 ui:
-  track_length_sec: 7200
+  track_length_sec: 10800
   sampling_step_sec: 60
   risk_colorbar:
     min: 0
