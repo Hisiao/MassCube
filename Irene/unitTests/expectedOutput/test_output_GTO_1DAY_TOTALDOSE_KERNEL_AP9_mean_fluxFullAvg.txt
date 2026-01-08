@@ -1,0 +1,17 @@
+# Irene Model output file: ../../unitTests/test_output_GTO_1DAY_TOTALDOSE_KERNEL_AP9_mean_fluxFullAvg.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AP9
+# Particle species:         H+
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.1 0.2 0.4 0.6 0.8 1 2 4 6 8 10 15 20 30 50 60 80 100 150 200 300 400 700 1200 2000
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Time format:              Year, day_of_year.frac
+# Coordinate system:        GDZ (WGS84 Geodetic) in km
+# Data Delimiter:           space
+#
+# datetime(year,ddd.frac),alt(km),lat(deg),lon(deg),flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux(#/cm^2/s/MeV)
+2015 2.0000000 0.00000 0.000000 0.000000 9.59978572e+07 5.03027594e+07 2.23725415e+07 1.18167999e+07 6.86737698e+06 1.92642866e+06 2.87024770e+05 4.53032731e+04 1.02455323e+04 3.33632553e+03 1.12380935e+03 3.88986763e+02 1.26901352e+02 4.51571873e+01 2.15310308e+01 1.30838958e+01 9.93273005e+00 6.18079575e+00 3.46896073e+00 1.45044799e+00 5.36650744e-01 6.55135817e-02 4.25031914e-03 1.02395926e-04 1.25036851e-07

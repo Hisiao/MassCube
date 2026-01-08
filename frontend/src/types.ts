@@ -24,6 +24,16 @@ export type FluxSample = {
   percentile: string;
 };
 
+export type FluxGrid = {
+  t: string;
+  channel: string;
+  percentile: string;
+  latitudes: number[];
+  longitudes: number[];
+  altitudes_km: number[];
+  values: number[][][];
+};
+
 export type Window = {
   t_start: string;
   t_end: string;
@@ -58,6 +68,21 @@ export type FluxConfig = {
     quiet_flux: number;
     storm_flux: number;
   };
+  ae9ap9: {
+    executable: string;
+    command_template: string;
+    output_format: string;
+    timeout_sec: number;
+    cache_dir: string;
+    cache_ttl_sec: number;
+    time_bucket_sec: number;
+    max_points_per_call: number;
+    grid_lat_step_deg: number;
+    grid_lon_step_deg: number;
+    grid_alt_layers_km: number[];
+    grid_mode: "2d" | "3d";
+    default_alt_km: number;
+  };
 };
 
 export type DecisionConfig = {
@@ -70,6 +95,8 @@ export type DecisionConfig = {
   lead_time_sec: number;
   lag_time_sec: number;
   inflate_factor: number;
+  risk_exponent: number;
+  risk_scale: number;
   trigger_kp_threshold: number;
 };
 

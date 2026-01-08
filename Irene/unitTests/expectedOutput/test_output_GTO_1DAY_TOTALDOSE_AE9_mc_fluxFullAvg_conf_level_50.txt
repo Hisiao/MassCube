@@ -1,0 +1,20 @@
+# Irene Model output file: ../../unitTests/test_output_GTO_1DAY_TOTALDOSE_AE9_mc_fluxFullAvg_conf_level_50.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AE9
+# Particle species:         e-
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.04 0.07 0.1 0.25 0.5 0.75 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 8.5 10
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Aggregation Confidence Level:   median (50)
+# Scenarios in Aggregation (6): 001, 002, 004, 006, 008, 010
+#
+# Time format:              Year, day_of_year.frac
+# Coordinate system:        GDZ (WGS84 Geodetic) in km
+# Data Delimiter:           space
+#
+# datetime(year,ddd.frac),alt(km),lat(deg),lon(deg),flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux(#/cm^2/s/MeV)
+2015 2.0000000 0.00000 0.000000 0.000000 8.27082199e+08 7.55117620e+08 2.32698653e+08 2.66984166e+07 4.84425730e+06 1.59614103e+06 7.13254672e+05 2.79505943e+05 9.03951565e+04 1.94521152e+04 4.52725425e+03 1.69673605e+03 8.87083206e+02 4.94385107e+02 2.85941099e+02 1.65653221e+02 1.02921157e+02 7.06678028e+01 4.19551026e+01 2.39826179e+01 1.65721022e+01

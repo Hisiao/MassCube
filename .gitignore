@@ -28,6 +28,11 @@ config/config.yaml
 
 # Data artifacts
 data/*.db
+data/ae9ap9_cache/*.json
+
+# IRENE outputs
+Irene/samples/expectedOutput/*.txt
+Irene/samples/*Output*.txt
 
 # Node / frontend
 frontend/node_modules/

@@ -1,0 +1,23 @@
+# Irene Model output file: ../../unitTests/test_output_KEPLER_SOLAR_TISSUE_mean_doseaccumFull.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AP9
+# Particle species:         H+
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.1 0.2 0.4 0.6 0.8 1 2 4 6 8 10 15 20 30 50 60 80 100 150 200 300 400 700 1200 2000
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Dose calculation method:  ShieldDose2 Model
+# Shielding geometry:       Spherical2pi
+# Shielding depths (mm):     0.3 0.4 0.5 0.6 0.8 1 1.2 1.6 2 2.5 3 10 30 100 
+# Detector type:            Tissue
+# Nuclear atten. mode:      NuclearAndNeutrons
+#
+# Time format:              Modified Julian Date
+# Coordinate system:        GEI (Geocentric Equatorial Inertial) Cartesian in Earth radii
+# Data Delimiter:           comma
+#
+# datetime(mjd),posx(Re),posy(Re),posz(Re),dose,dose,dose,dose,dose,dose,dose,dose,dose,dose,dose,dose,dose,dose(rads)
+57024.00000000,0.00000000,0.00000000,0.00000000,2.61391705e-02,4.93911041e-03,5.25714602e-04,5.99165027e-05,8.44315181e-10,1.10282380e-09,1.10269677e-09,1.10261806e-09,1.10251760e-09,1.10236205e-09,1.10217390e-09,1.09645905e-09,1.05819319e-09,8.61075192e-10

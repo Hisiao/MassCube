@@ -1,0 +1,17 @@
+# Irene Model output file: ../../unitTests/test_output_DOSE_WATER_NOJ2_mean_fluxFullAvg.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AP9
+# Particle species:         H+
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.1 0.2 0.4 0.6 0.8 1 2 4 6 8 10 15 20 30 50 60 80 100 150 200 300 400 700 1200 2000
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Time format:              Modified Julian Date
+# Coordinate system:        GEI (Geocentric Equatorial Inertial) Cartesian in Earth radii
+# Data Delimiter:           comma
+#
+# datetime(mjd),posx(Re),posy(Re),posz(Re),flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux(#/cm^2/s/MeV)
+57024.00000000,0.00000000,0.00000000,0.00000000,1.41340960e+08,7.47233471e+07,3.16158840e+07,1.56006091e+07,8.65063517e+06,2.30426644e+06,3.30381937e+05,5.11256368e+04,1.15501788e+04,3.82635568e+03,1.31206634e+03,4.63599078e+02,1.54074844e+02,5.55829423e+01,2.67092200e+01,1.62959642e+01,1.23811485e+01,7.70359555e+00,4.32348158e+00,1.81159690e+00,6.77309751e-01,8.59168973e-02,5.81240393e-03,1.47799632e-04,1.58028666e-07

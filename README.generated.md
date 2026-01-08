@@ -7,7 +7,7 @@
 - `app/services/`：模块化服务
   - `tle_service.py`：官方 TLE 源（http://8.141.94.91/tle/ty47.txt）优先，CelesTrak 备源（含降级 mock）、质量评估、历史存储（SQLite）。
   - `orbit_service.py`：SGP4 传播，TEME→ECEF→经纬高（优先 pymap3d.teme2ecef，不支持时回退 eci2ecef/GMST）。
-  - `flux_service.py`：可插拔通量模型（mock/AE9AP9 stub）。
+  - `flux_service.py`：可插拔通量模型（AE9/AP9 IRENE CLI + mock 兜底），支持沿轨与全球网格计算。
   - `decision_service.py`：Risk 计算、阈值/迟滞/防抖、lead/lag 窗口。
 - `config/config.yaml`：默认可运行配置，可通过 API 热更新；`config.example.yaml` 作为模版。
 - `requirements.txt`：依赖列表。
@@ -26,7 +26,8 @@ uvicorn app.main:app --reload --port 8000
 - `GET /config` / `PUT /config` 配置查看/热更新（含 schema 校验与版本号）。
 - `GET /sat/state?time=...` 指定时刻卫星位置/速度/质量分。
 - `GET /sat/track?start=...&end=...&step=...` 轨迹点串（默认长度/步长由配置驱动）。
-- `GET /env/flux/track?...` 沿轨通量时序（mock 或 AE9/AP9 stub）。
+- `GET /env/flux/track?...` 沿轨通量时序（AE9/AP9 CLI 输出）。
+- `GET /env/flux/grid?...` 全球网格通量（用于地球表面热力纹理）。
 - `GET /decision/windows?...` 观测 ON/OFF 窗口（含 lead/lag、迟滞、防抖、风险放大）。
 
 ## 配置与热更新
@@ -49,7 +50,12 @@ uvicorn app.main:app --reload --port 8000
 python -m pytest
 ```
 
+## AE9/AP9 IRENE 接入
+- 配置 `config/config.yaml` 中 `flux.model=ae9ap9`，并提供 `flux.ae9ap9.executable` 与 `flux.ae9ap9.command_template`。
+- `command_template` 需要包含 `{exe}`、`{input}`、`{output}` 占位符，CLI 输入为 JSON，输出支持 JSON/CSV。
+- 全球网格默认 2D（`grid_mode: 2d`），使用 `default_alt_km` 生成单层贴图；如需多高度层可改为 `grid_mode: 3d` 并配置 `grid_alt_layers_km`。
+- 若 CLI 未配置，将自动回退到 mock 通量模型（可在 `/config` 中查看 `flux_model` 字段）。
+
 ## 后续对接（标记 TODO）
-- 将 `flux.model` 切换为 AE9/AP9 IRENE 适配器时，替换 `FluxService._build_model` 中的 stub。
 - 如需接入其他源，可在 `TLESourceConfig` 中新增或替换主源；完善传播偏差度量与 TLE 推演比对。
 - 增强 config API：提供单版本回滚接口、schema 详情、差异预览。

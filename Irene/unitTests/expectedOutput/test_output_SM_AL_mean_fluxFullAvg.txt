@@ -1,0 +1,17 @@
+# Irene Model output file: ../../unitTests/test_output_SM_AL_mean_fluxFullAvg.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AE9
+# Particle species:         e-
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.04 0.07 0.1 0.25 0.5 0.75 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 8.5 10
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Time format:              Modified Julian Date
+# Coordinate system:        SM (Solar Magnetic) Cartesian in Earth radii
+# Data Delimiter:           comma
+#
+# datetime(mjd),posx(Re),posy(Re),posz(Re),flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux(#/cm^2/s/MeV)
+57024.00000000,0.00000000,0.00000000,0.00000000,1.05315059e+09,6.73233027e+08,1.85576473e+08,3.72275043e+07,6.80130467e+06,1.97315597e+06,6.83609628e+05,2.24420365e+05,6.58724614e+04,1.91205118e+04,6.45098398e+03,2.42457843e+03,1.03398150e+03,4.49657722e+02,2.17842296e+02,1.24957517e+02,8.61519092e+01,6.29915696e+01,3.84399159e+01,2.12479465e+01,1.46647208e+01

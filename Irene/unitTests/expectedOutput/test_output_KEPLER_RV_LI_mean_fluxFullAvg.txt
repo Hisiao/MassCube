@@ -1,0 +1,17 @@
+# Irene Model output file: ../../unitTests/test_output_KEPLER_RV_LI_mean_fluxFullAvg.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AE9
+# Particle species:         e-
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.04 0.07 0.1 0.25 0.5 0.75 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 8.5 10
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Time format:              Modified Julian Date
+# Coordinate system:        GEI (Geocentric Equatorial Inertial) Cartesian in Earth radii
+# Data Delimiter:           comma
+#
+# datetime(mjd),posx(Re),posy(Re),posz(Re),flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux(#/cm^2/s/MeV)
+57024.00000000,0.00000000,0.00000000,0.00000000,2.38735181e+08,1.81196690e+08,7.37411720e+07,2.48324171e+07,8.19578649e+06,3.63411648e+06,1.73070150e+06,6.25694979e+05,1.80707526e+05,5.27420628e+04,1.92133501e+04,8.23371863e+03,3.56667764e+03,1.54644405e+03,6.08527925e+02,2.69289123e+02,1.42822046e+02,9.63641109e+01,5.69924844e+01,2.94811800e+01,1.92589651e+01

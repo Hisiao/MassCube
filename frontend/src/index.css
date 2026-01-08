@@ -158,6 +158,64 @@ body {
   font-size: 12px;
 }
 
+.legend.flux-legend {
+  top: 120px;
+  right: 6px;
+  width: 128px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.legend-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.legend-unit {
+  margin-top: -2px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: #cbd5f5;
+  text-align: center;
+}
+
+.legend-bar-vert {
+  width: 12px;
+  height: 120px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f0501e 0%, #ffc83c 30%, #008cc8 70%, #0a143c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 6px 0;
+}
+
+.legend-vert {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.legend-scale-vert {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 120px;
+  font-size: 11px;
+  color: #cbd5f5;
+  padding: 4px 0;
+  text-align: center;
+  align-items: center;
+}
+
+.legend-note {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+}
+
 .legend-row {
   display: flex;
   align-items: center;

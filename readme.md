@@ -69,9 +69,9 @@ TLE 质量门控与评分（必须实现并对外暴露）：
 
 抽象接口 FluxModel：
 
-MockFluxModel（必须实现、默认启用）
+MockFluxModel（可选，用于测试与无 IRENE 环境）
 
-AE9AP9Model（对接 IRENE 的适配器允许先 TODO，但接口与配置必须完整）
+AE9AP9Model（对接 IRENE CLI，需提供可执行程序与命令模板）
 
 能段（至少支持，且可配置扩展）：
 
@@ -134,6 +134,7 @@ GET /sat/state（默认返回“当前时刻”实时坐标；也支持传 time�
 GET /sat/track?start&end&step
 
 GET /env/flux/track?start&end&step
+GET /env/flux/grid?time&channel&percentile&alt_km
 
 GET /decision/windows?start&end
 
@@ -235,7 +236,7 @@ min_off_time：10 分钟；min_on_time：10 分钟
 
 裕度放大 factor：2.0
 
-flux 模型：默认 Mock
+flux 模型：默认 AE9/AP9（IRENE CLI）
 
 Risk 权重与阈值：给出保守初值并注释
 
@@ -257,4 +258,4 @@ Risk 权重与阈值：给出保守初值并注释
 
 不要把参数写死
 
-在 README 中写明：如何切换 Mock/IRENE、如何解释每个参数对观测策略的影响（当前不使用 Space-Track 账号）
+在 README 中写明：如何配置 IRENE CLI（exe 与命令模板）、如何切换 Mock/IRENE、如何解释每个参数对观测策略的影响（当前不使用 Space-Track 账号）

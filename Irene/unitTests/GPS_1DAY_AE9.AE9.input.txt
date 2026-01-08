@@ -1,0 +1,47 @@
+# Description:    Input file for GPS_1DAY_AE9 test
+# Derived from:   test1Input.txt
+# Author:         Paul O'Brien
+
+ModelType:  AE9
+FluxType:   1PtDiff
+Energies:  0.04, 0.07, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 8.5, 10
+OrbitFile:  ../../unitTests/GPS_1DAY_GEI_orbit.dat
+ModelDB:    ../../modelData/AE9V15_runtime_tables.mat
+MagfieldDB: ../../modelData/igrfDB.h5
+KPhiDB: ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+OutFile:    ../../unitTests/test_output_GPS_1DAY_AE9.txt
+
+FluxOut: mean
+
+FluxOut: percentile,50
+FluxOut: percentile,95
+FluxOut: percentile,99
+
+FluxOut: perturbed,1-10
+FluxOut: montecarlo,1-10
+
+DoseRateOut: True
+DoseAccumOut: True
+
+TimeSpec: MJD
+InTimeSpec: MJD
+CoordSys: GEI
+InCoordSys: GEI
+CoordUnits: Re
+InCoordUnits: Re
+DataDelim: Comma
+InDataDelim: Comma
+
+Aggregate: median
+Aggregate: percent,90
+Aggregate: percent,95
+
+DoseDepths: 0.3, 1, 3, 10, 30, 100
+DoseDepthUnits: millimeters
+DoseGeometry: spherical
+DoseDetector: silicon
+DoseAttnMode: nuclearinteractions
+AccumMode: Cumul
+
+# end 

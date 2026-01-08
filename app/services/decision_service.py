@@ -23,7 +23,8 @@ class DecisionService:
                 weight = self.cfg.risk_weights.get(ch, 0.0)
                 if val <= 0:
                     continue
-                risk_val += weight * (val ** 0.1)
+                risk_val += weight * (val ** self.cfg.risk_exponent)
+            risk_val *= self.cfg.risk_scale
             risks.append(RiskSample(t=t, risk=risk_val))
         return risks
 

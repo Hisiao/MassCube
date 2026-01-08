@@ -43,6 +43,16 @@ class FluxSample(BaseModel):
     percentile: str
 
 
+class FluxGrid(BaseModel):
+    t: datetime
+    channel: str
+    percentile: str
+    latitudes: List[float]
+    longitudes: List[float]
+    altitudes_km: List[float]
+    values: List[List[List[float]]]
+
+
 class RiskSample(BaseModel):
     t: datetime
     risk: float
@@ -55,6 +65,16 @@ class Window(BaseModel):
     mode: Literal["OBS_ON", "OBS_OFF"]
     reason: str
     margins: Dict[str, float] = Field(default_factory=dict)
+
+
+class ObservationPlanItem(BaseModel):
+    mode: Literal["OBS_ON", "OBS_OFF"]
+    t_start: datetime
+    t_end: datetime
+    duration_sec: float
+    reason: str
+    command_on: str
+    command_off: str
 
 
 class ConfigVersioned(BaseModel):

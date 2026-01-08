@@ -1,0 +1,58 @@
+# Sample CmdLineIrene application input file for the AE-9 or AP-9 model runs. 
+# Any lines starting with a '#' are considered comments, and therefore ignored. 
+# 
+# Input parameters for the CmdLineIrene application in this file are expected
+# to be in a "Keyword: Value(s)" form.  Many different parameters are available
+# to define the flux model, its associated calculation options, energy levels
+# and generated output values.  Additional parameters are used to describe the
+# ephemeris or grid coordinates for the flux calculations, as well as subsequent
+# calculations to perform, such as radiation dosage behind shielding.
+# The available keywords and their associated values are fully described in the
+#  "IRENE: AE9/AP9/SPM Radiation Environment Model User's Guide" document.
+#
+# All file specifications may use either 'absolute' paths, or 'relative' paths
+# (in reference to the directory from which the CmdLineIrene application is run).
+# This sample input file uses 'relative' paths, which assumes that the application
+# is to be run from its installation directory location.
+# Alternatively, environment variables may be used in the file specifications;
+#  ie '$IRENE_DATA/igrfDB.h5'.
+#
+# -------------------------------------
+# Short test run for AP-9 model input parameters, generating orbit file:
+#
+# specify model type and corresponding database file
+ModelType:   AP9
+ModelDB:     ../../modelData/AP9V15_runtime_tables.mat
+#   for electrons (AE9), specify this model database file:
+###ModelDB:     ../../modelData/AE9V15_runtime_tables.mat
+#
+# define the file 'prefix' for all generated model output files
+OutFile:     ../../samples/Ap9ShortOutput.txt
+#
+# specify the supporting model database files for magfield and model coordinates
+MagfieldDB:  ../../modelData/igrfDB.h5
+KPhiDB:  ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+#
+#  specify flux type and list of energy levels appropriate for particle species
+FluxType:    1PtDiff
+Energies:    1.0, 1.5, 2.5, 5.0, 10.0, 20.0, 35.0, 60.0, 100.0, 150.0
+#  valid energy range for protons:   0.10 - 2000 MeV
+#  valid energy range for electrons: 0.04 - 10.0 MeV
+#
+# specify the flux calculation modes and additional calculation outputs
+FluxOut:       mean
+FluxOut:       percentile,50,75,95
+#
+# generate the ephemeris using mean elements; those not specified use default = 0.0
+#  (the ephemeris is written to the file specified in 'OrbitFile')
+OrbitFile:   ../../samples/ephem_short.dat
+OrbStart:     2010, 265, 0
+OrbEnd:       2010, 266, 43200
+OrbStep:      300.0
+OrbPropType:  SGP4
+OrbMode:      Improved
+OrbElemTime:  2010, 265, 0
+OrbIncl:      35.0
+OrbEcc:       0.1
+OrbMeanMot:   7.5

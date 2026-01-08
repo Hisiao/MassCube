@@ -1,0 +1,130 @@
+# Sample CmdLineIrene application input file for the "Legacy" model runs. 
+# Any lines starting with a '#' are considered comments, and therefore ignored. 
+# 
+# Legacy models: AE-8, AP-8, CRRESELE and CRRESPRO
+#
+# Input parameters for the CmdLineIrene application in this file are expected
+# to be in a "Keyword: Value(s)" form.  Many different parameters are available
+# to define the flux model, its associated calculation options, energy levels
+# and generated output values.  Additional parameters are used to describe the
+# ephemeris or grid coordinates for the flux calculations, as well as subsequent
+# calculations to perform, such as radiation dosage behind shielding.
+# The available keywords and their associated values are fully described in the
+#  "IRENE: AE9/AP9/SPM Radiation Environment Model User's Guide" document, Appendix A.
+#
+# All file specifications may use either 'absolute' paths, or 'relative' paths
+# (in reference to the directory from which the CmdLineIrene application is run).
+# This sample input file uses 'relative' paths, which assumes that the application
+# is to be run from its installation directory location.
+# Alternatively, environment variables may be used in the file specifications;
+#  ie '$IRENE_DATA/igrfDB.h5'.
+#
+# --------------------------------------------------
+# Example AE-8 model input data, using an existing orbit file:
+#
+# specify model type and corresponding database file
+ModelType: AE8
+##AP8
+##CRRESELE
+##CRRESPRO
+#
+#   the AE8, AP8 or CRRESELE/PRO model types all use this same model database file:
+ModelDB:     ../../modelData/radiationBeltDB.h5
+#
+# define the file 'prefix' for all generated model output files
+OutFile:     ../../samples/AE8SampleOutput.txt
+##OutFile:     ../../samples/AP8SampleOutput.txt
+##OutFile:     ../../samples/CRRESELESampleOutput.txt
+##OutFile:     ../../samples/CRRESPROSampleOutput.txt
+#
+# specify the supporting model database files for magfield
+MagfieldDB:  ../../modelData/igrfDB.h5
+#
+#  specify flux type and list of energy levels appropriate for model and particle species
+FluxType:    1PtDiff
+# for use with AE8
+Energies:    1.0, 1.5, 2.5, 5.0, 8.0
+#  valid energy range for AP8 (protons):   0.10 - 250 MeV
+#  valid energy range for AE8 (electrons): 0.04 - 8.0 MeV
+#  for CRRESELE and CRRESPRO, only specific energy levels are permitted;
+#     see the User's Guide, Appendix A for full list
+# for use with AP8
+##Energies: 1.0, 1.5, 2.5, 5.0, 10.0, 50.0, 100.0, 150.0
+# for use with CRRESELE
+##Energies:    0.95, 1.60, 2.0, 2.35, 2.75, 3.15, 3.75, 4.55
+# for use with CRRESPRO
+##Energies:    2.5, 3.6, 4.3, 5.7, 6.8, 8.5, 9.7, 10.7, 13.2, 16.9, 19.4
+#
+# specify model-specfic parameters; see the User's Guide for more details
+# for use with AE8 or AP8
+LegActLevel:  min
+# for use with CRRESPRO
+##LegActLevel:  quiet
+# for use with CRRESELE
+##Leg15dayAP:   20.0
+# these apply to all Legacy models:
+LegFixEpoch:  true 
+LegShiftSAA:  true
+#
+# specify the flux and additional calculation outputs
+FluxOut:      true
+FluenceOut:   true
+DoseRateOut:  true
+DoseAccumOut: true
+#
+# explicitly specify 'Cumulative' accumulation mode
+# (this affects the fluence and dose results produced)
+AccumMode: Cumul
+# ==> if not specified, the default mode is 'Interval' for 1 day
+#
+# specify the dose calculation model parameters
+DoseDepths:  0.10,0.20,0.35,0.50,0.75.1.00,1.50,2.00,3.00,5.00
+DoseDepthUnits:  mm
+DoseGeometry: spherical
+DoseDetector: silicon
+DoseAttnMode: none
+#
+# specify the ephemeris file to be used as input, and its time & coordinate system
+OrbitFile:   ../../samples/OrbitSample.txt
+InTimeSpec:   YrDDDGmt
+InCoordSys:    GEI
+#
+# additional parameters are available for defining input and output time forms,
+#  ephemeris coordinate systems, their units and ordering, and data delimiters
+#
+# Alternatively, the ephemeris information may be generated using a TLE file
+#  (the ephemeris is written to the file specified by 'OrbitFile')
+#OrbitFile:   ../../samples/ephem_vapA.dat
+#OrbTLE:      ../../samples/vapA_tle.dat
+## start and stop times in mjd; could be specified as 2013,280,0 and 2013,281,0
+#OrbStart:     56572.0
+#OrbEnd:       56573.0
+#OrbStep:      60.0
+#OrbPropType:  SatEph
+#TimeSpec: YrDddGmt
+#CoordSys: GDZ
+#CoordOrder: Inverted
+#DataDelim: Tab
+#
+# A second alternative is to generate the ephemeris using mean elements
+#  (the ephemeris is written to the file specified in 'OrbitFile')
+#OrbitFile:   ../../samples/ephem_mean_elem.dat
+#OrbStart:     2016, 265, 0
+#OrbEnd:       2016, 266, 0
+#OrbStep:      60.0
+#OrbPropType:  SGP4
+#OrbMode:      Improved
+#OrbDatum:     72Old
+#OrbIncl:      37.65
+#OrbArgPer:    150.66
+#OrbMeanAnom:  257.732
+#Orb1stDerMM:  0.0
+#OrbElemTime:  2016, 245, 43200
+#OrbEcc:       0.140000
+#OrbRAAN:      234.1040
+#OrbMeanMot:   7.525
+#Orb2ndDerMM:  0.0
+#OrbBStar:     0.0
+#CoordSys: GEI
+#CoordUnits: km
+#DataDelim: space

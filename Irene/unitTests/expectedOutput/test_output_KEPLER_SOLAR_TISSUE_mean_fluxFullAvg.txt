@@ -1,0 +1,17 @@
+# Irene Model output file: ../../unitTests/test_output_KEPLER_SOLAR_TISSUE_mean_fluxFullAvg.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AP9
+# Particle species:         H+
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.1 0.2 0.4 0.6 0.8 1 2 4 6 8 10 15 20 30 50 60 80 100 150 200 300 400 700 1200 2000
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Time format:              Modified Julian Date
+# Coordinate system:        GEI (Geocentric Equatorial Inertial) Cartesian in Earth radii
+# Data Delimiter:           comma
+#
+# datetime(mjd),posx(Re),posy(Re),posz(Re),flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux,flux(#/cm^2/s/MeV)
+57024.00000000,0.00000000,0.00000000,0.00000000,1.30355098e+08,6.00454548e+07,1.67608101e+07,4.58754760e+06,1.54653333e+06,2.00569416e+05,7.67528844e+03,7.69615364e+01,9.74206915e-01,2.67616735e-02,1.33420269e-03,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00,0.00000000e+00

@@ -1,0 +1,37 @@
+# Description:    Input file for RLL_GRAPHITE test
+# Derived from:   test1Input.txt
+# Author:         Paul O'Brien
+
+ModelType:  AE9
+FluxType:   1PtDiff
+Energies:  0.04, 0.07, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 8.5, 10
+OrbitFile:  ../../unitTests/GEO_1DAY_RLL_orbit.dat
+ModelDB:    ../../modelData/AE9V15_runtime_tables.mat
+MagfieldDB: ../../modelData/igrfDB.h5
+KPhiDB: ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+OutFile:    ../../unitTests/test_output_RLL_GRAPHITE.txt
+
+FluxOut: mean
+
+TimeSpec: MJD
+CoordSys: RLL
+DataDelim: Comma
+CoordUnits: km
+CoordOrder: Inverted
+
+InTimeSpec: MJD
+InCoordSys: RLL
+InDataDelim: Comma
+InCoordUnits: km
+InCoordOrder: Inverted
+
+DoseAccumOut: True
+DoseDepths: 0.03, 0.1, 0.3, 1, 3, 10, 30
+DoseDepthUnits: gpercm2
+DoseGeometry: spherical
+DoseDetector: graphite
+DoseAttnMode: nuclearinteractions
+AccumMode: Full
+
+# end 

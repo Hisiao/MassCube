@@ -1,0 +1,23 @@
+{
+  "version": 3,
+  "history": [
+    {
+      "version": 1,
+      "applied_at": "2026-01-08T05:19:11.354708",
+      "source": "api",
+      "config": {}
+    },
+    {
+      "version": 2,
+      "applied_at": "2026-01-08T05:19:20.021984",
+      "source": "api",
+      "config": {}
+    },
+    {
+      "version": 3,
+      "applied_at": "2026-01-08T05:19:20.867714",
+      "source": "api",
+      "config": {}
+    }
+  ]
+}

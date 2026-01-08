@@ -19,7 +19,7 @@ tle_quality:
     propagation: 0.3
 
 flux:
-  model: mock
+  model: ae9ap9
   percentile_default: mean
   percentile_on_trigger: p95
   energy_channels:
@@ -32,6 +32,24 @@ flux:
     storm_altitude_km: 1200
     quiet_flux: 1.0e2
     storm_flux: 5.0e4
+  ae9ap9:
+    executable: ""
+    command_template: ""
+    output_format: json
+    timeout_sec: 120
+    cache_dir: data/ae9ap9_cache
+    cache_ttl_sec: 86400
+    time_bucket_sec: 3600
+    max_points_per_call: 2000
+    grid_lat_step_deg: 2.0
+    grid_lon_step_deg: 2.0
+    grid_alt_layers_km:
+      - 400.0
+      - 600.0
+      - 800.0
+      - 1000.0
+    grid_mode: 2d
+    default_alt_km: 600.0
 
 decision:
   risk_weights:

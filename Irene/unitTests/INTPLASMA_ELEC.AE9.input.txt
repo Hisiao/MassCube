@@ -1,0 +1,38 @@
+# Description:    Input file for INTPLASMA_ELEC test
+# Derived from:   test1Input.txt
+# Author:         Paul O'Brien
+
+ModelType:  AE9
+FluxType:   integral
+Energies:  0.04, 0.07, 0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 8.5
+ModelDB:    ../../modelData/AE9V15_runtime_tables.mat
+MagfieldDB: ../../modelData/igrfDB.h5
+KPhiDB: ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+OutFile:    ../../unitTests/test_output_INTPLASMA_ELEC.AE9.output.txt
+OrbitFile:  ../../unitTests/test_output_INTPLASMA_ELEC_orbit.dat
+
+FluxOut: mean
+
+FluxOut: percentile,50
+FluxOut: percentile,95
+FluxOut: percentile,99
+
+FluxOut: perturbed,1-10
+
+FluenceOut: True
+AccumMode: Cumul
+
+Aggregate: median
+Aggregate: percent,90
+Aggregate: percent,95
+
+OrbPropType: Kepler
+OrbElemTime: 2015,1
+OrbStart: 2015,1
+OrbEnd: 2015,2
+OrbStep: 3600
+OrbGeoLon: 0
+OrbUseJ2: False
+
+# end 

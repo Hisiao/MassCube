@@ -1,0 +1,30 @@
+# Description:    Input file for GEO_1DAY_SPME test
+# Derived from:   test1Input.txt
+# Author:         Paul O'Brien
+
+ModelType:  PLASMAE
+FluxType:   2PtDiff
+Energies:  0.001,0.0013,0.0017,0.0021,0.0028,0.0036,0.0046,0.0059,0.0077,0.01,0.013,0.016,0.021,0.027
+Energies2:       0.0013,0.0017,0.0021,0.0028,0.0036,0.0046,0.0059,0.0077,0.01,0.013,0.016,0.021,0.027,0.035
+OrbitFile:  ../../unitTests/GEO_1DAY_orbit.dat
+ModelDB:    ../../modelData/SPMEV12_runtime_tables.mat
+MagfieldDB: ../../modelData/igrfDB.h5
+KPhiDB: ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+OutFile:    ../../unitTests/test_output_GEO_1DAY_SPME.txt
+
+FluxOut: mean
+
+TimeSpec: YrDDDGmt
+InTimeSpec: YrDDDGmt
+CoordSys: GEO
+InCoordSys: GEO
+CoordUnits: Re
+InCoordUnits: Re
+DataDelim: Tab
+InDataDelim: Tab
+
+PitchAngles: 45, 90
+AdiabatOut: True
+
+# end 

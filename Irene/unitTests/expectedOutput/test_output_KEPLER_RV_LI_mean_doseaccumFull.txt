@@ -1,0 +1,23 @@
+# Irene Model output file: ../../unitTests/test_output_KEPLER_RV_LI_mean_doseaccumFull.txt
+# Irene Software Version:  1.58.001
+#
+# Model type:               AE9
+# Particle species:         e-
+# Flux type:                1PtDiff
+# Flux direction:           Omnidirectional
+# Energy levels (MeV):       0.04 0.07 0.1 0.25 0.5 0.75 1 1.5 2 2.5 3 3.5 4 4.5 5 5.5 6 6.5 7 8.5 10
+#
+# Accumulation mode:        Full, length = [full time duration]
+#
+# Dose calculation method:  ShieldDose2 Model
+# Shielding geometry:       Spherical2pi
+# Shielding depths (mm):     0.3 1 3 10 30 100 
+# Detector type:            Lithium
+# Nuclear atten. mode:      NuclearInteractions
+#
+# Time format:              Modified Julian Date
+# Coordinate system:        GEI (Geocentric Equatorial Inertial) Cartesian in Earth radii
+# Data Delimiter:           comma
+#
+# datetime(mjd),posx(Re),posy(Re),posz(Re),dose,dose,dose,dose,dose,dose(rads)
+57024.00000000,0.00000000,0.00000000,0.00000000,9.63550032e+03,2.38821705e+03,1.94287874e+02,8.18122181e-01,1.95971396e-01,5.73956553e-02

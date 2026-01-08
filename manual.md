@@ -29,7 +29,8 @@ uvicorn app.main:app --reload --port 8000
 - 常用查询示例（在 `/docs` 里点 “Try it out” 或直接地址栏输入）：
   - 当前状态：`/sat/state` 或指定时间 `?time=2026-01-05T15:50:00Z`
   - 轨道轨迹：`/sat/track?start=2026-01-05T15:50:00Z&end=2026-01-05T16:10:00Z&step=60`
-  - 通量序列：`/env/flux/track?start=...&end=...&step=60&percentile=mean`（mock 数据）
+  - 通量序列：`/env/flux/track?start=...&end=...&step=60&percentile=mean`（AE9/AP9 IRENE 输出）
+  - 全球网格：`/env/flux/grid?time=...&channel=Je>1MeV&percentile=mean&alt_km=600`（用于热力图纹理，默认 2D 单高度层）
   - 决策窗口：`/decision/windows?start=...&end=...&step=60`
 - 配置查看/修改：
   - GET `/config` 查看当前配置与版本。
@@ -58,7 +59,20 @@ npm run dev    # 默认 http://127.0.0.1:5173
 - `app/services/`：核心业务（TLE 拉取与质量评估、轨道传播、通量生成、决策）。
 - `app/models.py`：接口输入输出的数据结构。
 - 数据与配置：`config/config.yaml`、`config/config_versions.json`、`data/tle_history.db`。
+## 观测计划生成依据（/decision/plan/export）
+- 计划时间范围：以输入 `start`（UTC）为起点，默认向后 24h，返回 OBS_ON 段计划。
+- 轨道与通量：后端依据 `track_step_sec` 生成轨迹，对每个时间点计算多能道通量。
+- 风险计算：对每个时间点使用加权幂指数模型：
+  - `risk = risk_scale * Σ( weight[channel] * flux[channel]^risk_exponent )`，参数来自 `config.decision`。
+  - 若 `orbit_quality < 0.5`，风险按 `inflate_factor` 放大，降低轨道质量带来的漏判风险。
+- 开关机规则：
+  - 当 `risk > r_off` 切到 OBS_OFF（提前 `lead_time_sec` 关机）。
+  - 当 `risk < r_on` 切到 OBS_ON（延后 `lag_time_sec` 开机）。
+  - `hold_time_sec/min_on_time_sec/min_off_time_sec` 约束最短保持时长。
+- 导出内容：CSV 仅包含 OBS_ON 段（开机/关机/时长），并附 `norad_id`、`tle_epoch_utc`、`percentile`、`flux_model`、`track_step_sec` 作为追溯信息。
 
 ## 小贴士
 - 如果接口返回 “No TLE available”，等后台刷新一轮或重启服务再试。
-- 目前通量与风险为 mock 逻辑，用于流程验证；替换真模型时只需调整 `flux.model` 及对应适配。
+- 通量由 AE9/AP9 IRENE CLI 计算；如需使用 mock，可把 `flux.model` 改为 `mock`。
+- IRENE CLI 输入输出约定：输入 JSON（包含 points/channels/percentile），输出 JSON（points[i].values）或 CSV（index,channel,value）。
+- 若 CLI 未配置，系统会自动回退到 mock 通量模型，可在 `/config` 响应中查看 `flux_model`。

@@ -1,0 +1,38 @@
+# Description:    Input file for INTPLASMA_BOTH test
+# Derived from:   test1Input.txt
+# Author:         Paul O'Brien
+
+ModelType:  AP9
+FluxType:   integral
+Energies:  0.1,0.2,0.4,0.6,0.8,1,2,4,6,8,10,15,20,30,50,60,80,100,150,200,300,400,700,1200,2000
+ModelDB:    ../../modelData/AP9V15_runtime_tables.mat
+MagfieldDB: ../../modelData/igrfDB.h5
+KPhiDB: ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+OutFile:    ../../unitTests/test_output_INTPLASMA_BOTH.AP9.output.txt
+OrbitFile:  ../../unitTests/test_output_INTPLASMA_BOTH_orbit.dat
+
+FluxOut: mean
+
+FluxOut: percentile,50
+FluxOut: percentile,95
+FluxOut: percentile,99
+
+FluxOut: perturbed,1-10
+
+FluenceOut: True
+AccumMode: Cumul
+
+Aggregate: median
+Aggregate: percent,90
+Aggregate: percent,95
+
+OrbPropType: Kepler
+OrbElemTime: 2015,1
+OrbStart: 2015,1
+OrbEnd: 2015,2
+OrbStep: 3600
+OrbGeoLon: 0
+OrbUseJ2: False
+
+# end 

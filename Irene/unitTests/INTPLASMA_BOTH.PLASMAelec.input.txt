@@ -1,0 +1,39 @@
+# Description:    Input file for INTPLASMA_BOTH test
+# Derived from:   test1Input.txt
+# Author:         Paul O'Brien
+
+ModelType:  PLASMAE
+FluxType:   2PtDiff
+Energies:  0.001,0.0013,0.0017,0.0021,0.0028,0.0036,0.0046,0.0059,0.0077,0.01,0.013,0.016,0.021,0.027,0.035
+Energies2: 0.04, 0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04,  0.04,0.04, 0.04, 0.04, 0.04, 0.04
+ModelDB:    ../../modelData/SPMEV12_runtime_tables.mat
+MagfieldDB: ../../modelData/igrfDB.h5
+KPhiDB: ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+OutFile:    ../../unitTests/test_output_INTPLASMA_BOTH.PLASMAelec.output.txt
+OrbitFile:  ../../unitTests/test_output_INTPLASMA_BOTH_orbit.dat
+
+FluxOut: mean
+
+FluxOut: percentile,50
+FluxOut: percentile,95
+FluxOut: percentile,99
+
+FluxOut: perturbed,1-10
+
+FluenceOut: True
+AccumMode: Cumul
+
+Aggregate: median
+Aggregate: percent,90
+Aggregate: percent,95
+
+OrbPropType: Kepler
+OrbElemTime: 2015,1
+OrbStart: 2015,1
+OrbEnd: 2015,2
+OrbStep: 3600
+OrbGeoLon: 0
+OrbUseJ2: False
+
+# end 

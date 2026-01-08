@@ -1,0 +1,118 @@
+# Sample CmdLineIrene application input file for the AE-9 or AP-9 model runs. 
+# Any lines starting with a '#' are considered comments, and therefore ignored. 
+# 
+# Input parameters for the CmdLineIrene application in this file are expected
+# to be in a "Keyword: Value(s)" form.  Many different parameters are available
+# to define the flux model, its associated calculation options, energy levels
+# and generated output values.  Additional parameters are used to describe the
+# ephemeris or grid coordinates for the flux calculations, as well as subsequent
+# calculations to perform, such as radiation dosage behind shielding.
+# The available keywords and their associated values are fully described in the
+#  "IRENE: AE9/AP9/SPM Radiation Environment Model User's Guide" document.
+#
+# All file specifications may use either 'absolute' paths, or 'relative' paths
+# (in reference to the directory from which the CmdLineIrene application is run).
+# This sample input file uses 'relative' paths, which assumes that the application
+# is to be run from its installation directory location.
+# Alternatively, environment variables may be used in the file specifications;
+#  ie '$IRENE_DATA/igrfDB.h5'.
+#
+# -------------------------------------
+# Example AE-9/AP-9 model input parameters, using an existing orbit file:
+#
+# specify model type and corresponding database file
+ModelType:   AP9
+ModelDB:     ../../modelData/AP9V15_runtime_tables.mat
+##ModelType:   AE9
+#   for electrons (AE9), specify this model database file:
+##ModelDB:     ../../modelData/AE9V15_runtime_tables.mat
+#
+# define the file 'prefix' for all generated model output files
+OutFile:     ../../samples/Ap9SampleOutput.txt
+##OutFile:     ../../samples/Ae9SampleOutput.txt
+#
+# specify the supporting model database files for magfield and model coordinates
+MagfieldDB:  ../../modelData/igrfDB.h5
+KPhiDB:  ../../modelData/fastPhi_net.mat
+KHminDB: ../../modelData/fast_hmin_net.mat
+#
+#  specify flux type and list of energy levels appropriate for particle species
+FluxType:    1PtDiff
+Energies:    1.0, 1.5, 2.5, 5.0, 10.0, 50.0, 100.0, 500.0, 1000.0
+#  valid energy range for protons:   0.10 - 2000 MeV
+#  valid energy range for electrons: 0.04 - 10.0 MeV
+# For fluxType 2PtDiff with protons, the following line would be uncommented
+#Energies2:   1.1, 1.6, 2.6, 5.1, 10.1, 50.1, 100.1, 500.1, 1000.1
+#
+# specify the flux calculation modes and additional calculation outputs
+FluxOut:       mean
+FluxOut:       perturbed,1-10,15,25,268-277,711,888,921,947
+FluxOut:       percentile,50,75,99
+# accumulation settings affect results of fluence and dose calculations
+# accumulation interval (units=days) is 90 minutes
+AccumInterval: 0.0625
+AccumMode:     Interval
+FluenceOut:    true
+DoseRateOut:   true
+DoseAccumOut:  true
+#  aggregation confidence levels are determined from 'perturbed mean' and/or 
+#   'monte carlo' scenario calculation results
+Aggregate:  percent,25,50,75,95
+#
+# specify the dose calculation model parameters
+DoseDepths:  5.0,10.0,20.0,50.0,100.0,200.0,500.0
+DoseDepthUnits:  mils
+DoseGeometry: finiteslab
+DoseDetector: bone
+DoseAttnMode:  nuclearinteractions
+#
+# specify the ephemeris file to be used as input, and its time & coordinate system
+OrbitFile:   ../../samples/OrbitSample.txt
+InTimeSpec:   YrDDDGmt
+InCoordSys:    GEI
+#
+# additional parameters are available for defining input and output time forms,
+#  ephemeris coordinate systems, their units and ordering, and data delimiters
+#
+# Alternatively, the ephemeris information may be generated using a TLE file
+#  (the ephemeris is written to the file specified by 'OrbitFile')
+#OrbitFile:   ../../samples/ephem_vapA.dat
+#OrbTLE:      ../../samples/vapA_tle.dat
+## start and stop times in mjd; could be specified as 2013,280,0 and 2013,281,0
+#OrbStart:     56572.0
+#OrbEnd:       56573.0
+#OrbStep:      60.0
+#OrbPropType:  SatEph
+#TimeSpec: YrDddGmt
+#CoordSys: GDZ
+#CoordOrder: Inverted
+#DataDelim: Tab
+#
+# A second alternative is to generate the ephemeris using mean elements
+#  (the ephemeris is written to the file specified in 'OrbitFile')
+#OrbitFile:   ../../samples/ephem_mean_elem.dat
+#OrbStart:     2016, 265, 0
+#OrbEnd:       2016, 266, 0
+#OrbStep:      60.0
+#OrbPropType:  SGP4
+#OrbMode:      Improved
+#OrbDatum:     72Old
+#OrbIncl:      37.65
+#OrbArgPer:    150.66
+#OrbMeanAnom:  257.732
+#Orb1stDerMM:  0.0
+#OrbElemTime:  2016, 245, 43200
+#OrbEcc:       0.140000
+#OrbRAAN:      234.1040
+#OrbMeanMot:   7.525
+#Orb2ndDerMM:  0.0
+#OrbBStar:     0.0
+#CoordSys: GEI
+#CoordUnits: km
+#DataDelim: space
+#
+# uncomment the following DirFile entry for unidirectional flux
+#  ==>dose-related parameters will need to be commented out:
+#     dose calculations *require* omnidir 1PtDiff fluxes
+#DirFile:    ../../samples/DirectionSample.txt
+#

@@ -52,6 +52,36 @@ class FluxMockProfile(BaseModel):
     storm_flux: float = 5.0e4
 
 
+class AE9AP9CLIConfig(BaseModel):
+    executable: str = ""
+    command_template: str = ""
+    output_format: str = "json"
+    timeout_sec: int = 120
+    cache_dir: str = "data/ae9ap9_cache"
+    cache_ttl_sec: int = 86400
+    time_bucket_sec: int = 3600
+    max_points_per_call: int = 2000
+    grid_lat_step_deg: float = 2.0
+    grid_lon_step_deg: float = 2.0
+    grid_alt_layers_km: list[float] = Field(default_factory=lambda: [400.0, 600.0, 800.0, 1000.0])
+    grid_mode: str = "2d"
+    default_alt_km: float = 600.0
+
+    @field_validator("output_format")
+    @classmethod
+    def validate_output_format(cls, v: str) -> str:
+        if v not in {"json", "csv"}:
+            raise ValueError("ae9ap9.output_format must be 'json' or 'csv'")
+        return v
+
+    @field_validator("grid_mode")
+    @classmethod
+    def validate_grid_mode(cls, v: str) -> str:
+        if v not in {"2d", "3d"}:
+            raise ValueError("ae9ap9.grid_mode must be '2d' or '3d'")
+        return v
+
+
 class FluxConfig(BaseModel):
     model: str = "mock"
     percentile_default: str = "mean"
@@ -60,6 +90,7 @@ class FluxConfig(BaseModel):
         default_factory=lambda: ["Je>100keV", "Je>1MeV", "Jp>10MeV", "Jp>50MeV"]
     )
     mock_profile: FluxMockProfile = FluxMockProfile()
+    ae9ap9: AE9AP9CLIConfig = Field(default_factory=AE9AP9CLIConfig)
 
     @field_validator("model")
     @classmethod
@@ -86,6 +117,8 @@ class DecisionConfig(BaseModel):
     lead_time_sec: int = 180
     lag_time_sec: int = 180
     inflate_factor: float = 2.0
+    risk_exponent: float = 0.2
+    risk_scale: float = 1.0
     trigger_kp_threshold: int = 6
 
     @field_validator("risk_weights")
@@ -103,12 +136,26 @@ class UIConfig(BaseModel):
     risk_colorbar: Dict[str, float] = Field(default_factory=lambda: {"min": 0, "max": 6})
 
 
+class CleanupConfig(BaseModel):
+    enabled: bool = True
+    interval_sec: int = 3600
+    max_age_sec: int = 6 * 3600
+    targets: list[str] = Field(
+        default_factory=lambda: [
+            "data/ae9ap9_cache/*.json",
+            "Irene/samples/expectedOutput/*.txt",
+            "Irene/samples/*Output*.txt",
+        ]
+    )
+
+
 class AppConfig(BaseModel):
     orbits: OrbitConfig = OrbitConfig()
     tle_quality: TLEQualityConfig = TLEQualityConfig()
     flux: FluxConfig = FluxConfig()
     decision: DecisionConfig = DecisionConfig()
     ui: UIConfig = UIConfig()
+    cleanup: CleanupConfig = CleanupConfig()
 
     @classmethod
     def from_dict(cls, data: Dict) -> "AppConfig":

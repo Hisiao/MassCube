@@ -1,0 +1,91 @@
+# Sample CmdLineIrene application input file for the CAMMICE/MICS model run. 
+# Any lines starting with a '#' are considered comments, and therefore ignored. 
+# 
+# Input parameters for the CmdLineIrene application in this file are expected
+# to be in a "Keyword: Value(s)" form.  Many different parameters are available
+# to define the flux model, its associated calculation options, energy levels
+# and generated output values.  Additional parameters are used to describe the
+# ephemeris or grid coordinates for the flux calculations.
+# The available keywords and their associated values are fully described in the
+#  "IRENE: AE9/AP9/SPM Radiation Environment Model User's Guide" document, Appendix B.
+#
+# All file specifications may use either 'absolute' paths, or 'relative' paths
+# (in reference to the directory from which the CmdLineIrene application is run).
+# This sample input file uses 'relative' paths, which assumes that the application
+# is to be run from its installation directory location.
+# Alternatively, environment variables may be used in the file specifications;
+#  ie '$IRENE_DATA/igrfDB.h5'.
+#
+# -------------------------------------
+# Example Cammice model input parameters, using an existing orbit file:
+#
+# specify model type and corresponding database file
+ModelType:   CAMMICE
+ModelDB:     ../../modelData/cammiceDB.h5
+#
+# define the file 'prefix' for all generated model output files
+OutFile:     ../../samples/CammiceSampleOutput.txt
+
+# specify the supporting model database files for magfield
+MagfieldDB:  ../../modelData/igrfDB.h5
+
+# specify model-specfic parameters
+CamModel:     igrfop
+CamDstData:   filtered
+CamSpecies:   h+, he+
+CamPAngle:    omni
+#
+# specify the flux calculation modes and additional calculation outputs
+#  (dose calculations not available for Cammice model)
+FluxOut:      true
+FluenceOut:   true
+#
+# explicitly specify 'Cumulative' accumulation mode
+# (this affects the fluence results produced)
+AccumMode: Cumul
+# ==> if not specified, the default mode is 'Interval' for 1 day
+#
+# specify the ephemeris file to be used as input, and its time & coordinate system
+OrbitFile:   ../../samples/OrbitSample.txt
+InTimeSpec:  YrDDDGmt
+InCoordSys:  GEI
+#
+# additional parameters are available for defining input and output time forms,
+#  ephemeris coordinate systems, their units and ordering, and data delimiters
+#
+# Alternatively, the ephemeris information may be generated using a TLE file
+#  (the ephemeris is written to the file specified by 'OrbitFile')
+#OrbitFile:   ../../samples/ephem_vapA.dat
+#OrbTLE:      ../../samples/vapA_tle.dat
+## start and stop times in mjd; could be specified as 2013,280,0 and 2013,281,0
+#OrbStart:     56572.0
+#OrbEnd:       56573.0
+#OrbStep:      60.0
+#OrbPropType:  SatEph
+#TimeSpec: YrDddGmt
+#CoordSys: GDZ
+#CoordOrder: Inverted
+#DataDelim: Tab
+#
+# A second alternative is to generate the ephemeris using mean elements
+#  (the ephemeris is written to the file specified in 'OrbitFile')
+#OrbitFile:   ../../samples/ephem_mean_elem.dat
+#OrbStart:     2016, 265, 0
+#OrbEnd:       2016, 266, 0
+#OrbStep:      60.0
+#OrbPropType:  SGP4
+#OrbMode:      Improved
+#OrbDatum:     72Old
+#OrbIncl:      37.65
+#OrbArgPer:    150.66
+#OrbMeanAnom:  257.732
+#Orb1stDerMM:  0.0
+#OrbElemTime:  2016, 245, 43200
+#OrbEcc:       0.140000
+#OrbRAAN:      234.1040
+#OrbMeanMot:   7.525
+#Orb2ndDerMM:  0.0
+#OrbBStar:     0.0
+#CoordSys: GEI
+#CoordUnits: km
+#DataDelim: space
