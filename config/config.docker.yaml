@@ -1,0 +1,81 @@
+orbits:
+  refresh_rate_sec: 900
+  prediction_horizon_sec: 14400
+  history_days: 14
+  teme_to_ecef: pymap3d
+  track_step_sec: 60
+tle_quality:
+  freshness_max_sec: 7200
+  element_change_threshold:
+    mean_motion: 0.05
+    inclination_deg: 0.05
+    raan_deg: 0.05
+    eccentricity: 0.0001
+  propagation_tolerance_km: 15.0
+  score_weights:
+    freshness: 0.4
+    stability: 0.3
+    propagation: 0.3
+flux:
+  model: mock
+  percentile_default: mean
+  percentile_on_trigger: p95
+  energy_channels:
+  - Je>100keV
+  - Je>1MeV
+  - Jp>10MeV
+  - Jp>50MeV
+  mock_profile:
+    quiet_altitude_km: 800.0
+    storm_altitude_km: 1200.0
+    quiet_flux: 100.0
+    storm_flux: 50000.0
+  ae9ap9:
+    executable: ""
+    command_template: ""
+    output_format: json
+    timeout_sec: 120
+    cache_dir: data/ae9ap9_cache
+    cache_ttl_sec: 86400
+    time_bucket_sec: 3600
+    max_points_per_call: 2000
+    grid_lat_step_deg: 2.0
+    grid_lon_step_deg: 2.0
+    grid_alt_layers_km:
+    - 400.0
+    - 600.0
+    - 800.0
+    - 1000.0
+    grid_mode: 2d
+    default_alt_km: 600.0
+decision:
+  risk_weights:
+    Je>100keV: 0.4
+    Je>1MeV: 0.3
+    Jp>10MeV: 0.2
+    Jp>50MeV: 0.1
+  r_off: 4.2
+  r_on: 3.0
+  hold_time_sec: 20
+  min_off_time_sec: 0
+  min_on_time_sec: 0
+  lead_time_sec: 180
+  lag_time_sec: 180
+  inflate_factor: 2.0
+  risk_exponent: 0.2
+  risk_scale: 1.0
+  trigger_kp_threshold: 6
+ui:
+  track_length_sec: 7200
+  sampling_step_sec: 60
+  risk_colorbar:
+    min: 0.0
+    max: 6.0
+cleanup:
+  enabled: true
+  interval_sec: 3600
+  max_age_sec: 3600
+  targets:
+  - data/ae9ap9_cache/*.json
+  - Irene/samples/expectedOutput/*.txt
+  - Irene/samples/*Output*.txt
