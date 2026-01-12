@@ -1,74 +1,93 @@
-﻿# MASS-Cube
+# Mass-Cube Monitor
 
-## 面向零基础的项目介绍
-MASS-Cube 是一个端到端的航天任务演示系统。它把“卫星轨道 → 辐射通量 → 观测开关决策 → 3D 可视化”串起来，方便在网页上直观看到卫星位置、风险变化，以及系统为何决定观测开/关。
 
-你可以把它理解为“会看轨道、会算风险、会告诉你什么时候该关机”的小型卫星任务演示平台。
 
-## 系统做了什么
-1) 获取 TLE（两行轨道根数）
-2) 用 SGP4 推进轨道，得到任意时刻的卫星位置
-3) 根据位置估计辐射通量
-4) 把通量转换为风险分数，输出观测开/关窗口
-5) 前端 3D 地球展示轨迹与风险，左侧面板可改参数并实时生效
+## Getting started
 
-## 设计思路（整体）
-- 分层清晰：TLE、轨道、通量、决策分别是独立服务模块，便于替换数据源或算法。
-- 配置驱动：所有阈值、权重、时间参数都放在 `config/config.yaml`，并支持 API 热更新。
-- 可回滚：配置更新会保存版本历史，便于追溯与回退。
-- 可靠兜底：没有 IRENE CLI 时自动回退到 mock 通量模型，保证系统可运行。
-- 前后端分离：前端默认 `/api` 反向代理访问后端，适配本地与服务器部署。
+To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
-## 后端设计（FastAPI）
-**入口与路由**
-- `app/main.py`：应用入口，提供健康检查、配置、轨道、通量、决策等 API。
+Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
-**核心服务**
-- `tle_service.py`：从官方 TLE 源抓取并评估质量，失败时降级。
-- `orbit_service.py`：SGP4 轨道推进，TEME → ECEF → 经纬高转换。
-- `flux_service.py`：通量模型封装（IRENE CLI 或 mock）。
-- `decision_service.py`：把通量转换为风险，并输出观测开/关窗口。
+## Add your files
 
-**配置系统**
-- `app/config.py`：读取 `config/config.yaml`，负责校验、版本记录与回滚。
-- `config/config_versions.json`：记录历史配置版本。
+- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
+- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
 
-## 前端设计（Vite + React + Cesium）
-**目标**
-- 左侧：实时状态与参数配置面板
-- 右侧：3D 地球与轨迹可视化
-- 改参数后，立即刷新轨迹/通量/决策结果
+```
+cd existing_repo
+git remote add origin https://git.grid.science:30443/xisiao/mass-cube-monitor.git
+git branch -M main
+git push -uf origin main
+```
 
-**数据流**
-- 首次加载：`/config`、`/sat/track`、`/env/flux/track`、`/decision/windows`
-- 实时更新：定时轮询状态与轨迹
+## Integrate with your tools
 
-## 选择的模型与策略
-**轨道模型**
-- 采用 Vallado SGP4（`sgp4` 包）进行轨道推进
-- 坐标转换优先 `pymap3d.teme2ecef`
+- [ ] [Set up project integrations](https://git.grid.science:30443/xisiao/mass-cube-monitor/-/settings/integrations)
 
-**通量模型**
-- 默认 mock 通量：保证本地/服务器可运行
-- 可选 AE9/AP9：通过 IRENE CLI 计算
+## Collaborate with your team
 
-**风险模型（决策核心）**
-- 风险分数 = 加权通量的幂指数合成（参数可配置）
-- 通过 `r_off` / `r_on`、`hold_time`、`lead_time` / `lag_time` 决定开关窗口
+- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
+- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
+- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
+- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
+- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
 
-## 轨迹与时间长度（默认值）
-这些参数来自 `config/config.yaml`，可在网页中修改并热更新：
-- 轨道预测时长：4 小时（`orbits.prediction_horizon_sec`）
-- 前端默认轨迹长度：2 小时（`ui.track_length_sec` = 7200 秒）
-- 轨迹步长：60 秒（`orbits.track_step_sec`）
+## Test and Deploy
 
-## 主要接口（示例）
-- 健康检查：`GET /healthz`
-- 配置读取/更新：`GET /config`、`PUT /config`
-- 卫星状态：`GET /sat/state`
-- 轨迹：`GET /sat/track?start&end&step`
-- 通量：`GET /env/flux/track?start&end&step&percentile`
-- 决策窗口：`GET /decision/windows?start&end&step`
+Use the built-in continuous integration in GitLab.
 
-## 如何运行
-详细步骤见 `manual.md`。
+- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
+- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
+- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
+- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
+- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+
+***
+
+# Editing this README
+
+When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+
+## Suggestions for a good README
+
+Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+
+## Name
+Choose a self-explaining name for your project.
+
+## Description
+Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+
+## Badges
+On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+
+## Visuals
+Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+
+## Installation
+Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+## Usage
+Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+
+## Support
+Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+
+## Roadmap
+If you have ideas for releases in the future, it is a good idea to list them in the README.
+
+## Contributing
+State if you are open to contributions and what your requirements are for accepting them.
+
+For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+
+You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+
+## Authors and acknowledgment
+Show your appreciation to those who have contributed to the project.
+
+## License
+For open source projects, say how it is licensed.
+
+## Project status
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
