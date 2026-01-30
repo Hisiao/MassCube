@@ -1,7 +1,7 @@
 ﻿# app 后端说明
 
 ## 1. 项目概述
-`app` 目录是 MASS-Cube 的后端实现，负责 TLE 获取与质量评估、轨道推进、通量计算、风险决策以及 API 服务。系统支持配置热更新与版本回滚，并在启动后运行后台任务（TLE 刷新、缓存清理）。
+`app` 目录是 MASS-Cube 的后端实现，负责 TLE 获取与质量评估、轨道推进、通量计算、风险决策以及 API 服务。系统支持配置热更新并保留版本历史（回滚能力在 `ConfigStore` 内实现，但当前未暴露 API），并在启动后运行后台任务（TLE 刷新、缓存清理）。
 
 ## 2. 技术栈
 - 前端
@@ -22,9 +22,9 @@
 ## 3. 项目架构
 - 配置层：`ConfigStore` 从 `config/config.yaml` 加载配置，更新后写入 `config/config_versions.json`，并触发服务重建。
 - 服务层：
-  - `TLEService` 从官方源或 CelesTrak 拉取 TLE，进行质量评分并保存到 SQLite。
+  - `TLEService` 从 `TLESourceConfig.primary_url` 拉取 TLE，失败时回退到 CelesTrak；如仍失败则使用 mock TLE，并进行质量评分后保存到 SQLite。
   - `OrbitService` 使用 SGP4 推进轨道并输出经纬高。
-  - `FluxService` 根据轨道点计算通量序列或网格，支持 mock 与 AE9/AP9 CLI 两种模式，并带缓存。
+  - `FluxService` 根据轨道点计算通量序列或网格，支持 mock、AE9/AP9 CLI 与 AP8/AE8 SPENVIS 网格。
   - `DecisionService` 将通量映射到风险并生成观测开/关窗口。
 - API 层：`app/main.py` 提供配置、轨道、通量、决策与计划导出接口，并在启动时创建后台任务（TLE 刷新、缓存清理）。
 
@@ -37,7 +37,7 @@ app/
   services/
     tle_service.py        # TLE 拉取、质量评估与 SQLite 存储
     orbit_service.py      # SGP4 推进与坐标转换
-    flux_service.py       # 通量模型（mock / AE9AP9 CLI）
+    flux_service.py       # 通量模型（mock / AE9AP9 CLI / AP8AE8 SPENVIS）
     decision_service.py   # 风险计算与开关窗口
   tools/
     irene_cli.py          # IRENE CLI 适配器

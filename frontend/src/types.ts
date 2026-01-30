@@ -58,7 +58,7 @@ export type TLEQualityConfig = {
 };
 
 export type FluxConfig = {
-  model: "mock" | "ae9ap9";
+  model: "mock" | "ae9ap9" | "ap8ae8";
   percentile_default: string;
   percentile_on_trigger: string;
   energy_channels: Record<number, string> | string[];
@@ -81,6 +81,15 @@ export type FluxConfig = {
     grid_lon_step_deg: number;
     grid_alt_layers_km: number[];
     grid_mode: "2d" | "3d";
+    default_alt_km: number;
+  };
+  ap8ae8: {
+    pos_path: string;
+    flux_path: string;
+    channel: string;
+    alt_km: number;
+    grid_lat_step_deg: number;
+    grid_lon_step_deg: number;
     default_alt_km: number;
   };
 };

@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-from app.config import AE9AP9CLIConfig, FluxConfig, FluxMockProfile
+from app.config import AE9AP9CLIConfig, AP8AE8Config, FluxConfig, FluxMockProfile
 from app.models import FluxSample, TrackPoint
 
 
@@ -128,15 +128,179 @@ class AE9AP9Model(FluxModel):
         path.write_text(json.dumps(data), encoding="utf-8")
 
 
+class AP8AE8Model(FluxModel):
+    def __init__(self, cfg: AP8AE8Config):
+        self.cfg = cfg
+        self.channel = cfg.channel
+        self.alt_km = cfg.alt_km
+        self.latitudes, self.longitudes, self.grid = self._load_grid(cfg.pos_path, cfg.flux_path)
+
+    def flux(self, point: TrackPoint, percentile: str) -> Dict[str, float]:
+        return self.flux_batch([point], percentile)[0]
+
+    def flux_batch(self, points: List[TrackPoint], percentile: str) -> List[Dict[str, float]]:
+        values: List[Dict[str, float]] = []
+        for pt in points:
+            val = self._interp_flux(pt.lat, pt.lon)
+            values.append({self.channel: val})
+        return values
+
+    def grid_values(self, channel: str) -> Tuple[List[float], List[float], List[List[float]]]:
+        if channel != self.channel:
+            empty = [[0.0 for _ in self.longitudes] for _ in self.latitudes]
+            return list(self.latitudes), list(self.longitudes), empty
+        return list(self.latitudes), list(self.longitudes), [row[:] for row in self.grid]
+
+    def _interp_flux(self, lat: float, lon: float) -> float:
+        lon = self._normalize_lon(lon)
+        latitudes = np.asarray(self.latitudes, dtype=float)
+        longitudes = np.asarray(self.longitudes, dtype=float)
+        lat = float(np.clip(lat, latitudes[0], latitudes[-1]))
+        lon = float(np.clip(lon, longitudes[0], longitudes[-1]))
+
+        i1 = int(np.searchsorted(latitudes, lat, side="right"))
+        if i1 <= 0:
+            i0 = i1 = 0
+        elif i1 >= len(latitudes):
+            i0 = i1 = len(latitudes) - 1
+        else:
+            i0 = i1 - 1
+
+        j1 = int(np.searchsorted(longitudes, lon, side="right"))
+        if j1 <= 0:
+            j0 = j1 = 0
+        elif j1 >= len(longitudes):
+            j0 = j1 = len(longitudes) - 1
+        else:
+            j0 = j1 - 1
+
+        if i0 == i1 and j0 == j1:
+            return self.grid[i0][j0]
+        if i0 == i1:
+            return self._lerp(self.grid[i0][j0], self.grid[i0][j1], longitudes[j0], longitudes[j1], lon)
+        if j0 == j1:
+            return self._lerp(self.grid[i0][j0], self.grid[i1][j0], latitudes[i0], latitudes[i1], lat)
+
+        f00 = self.grid[i0][j0]
+        f01 = self.grid[i0][j1]
+        f10 = self.grid[i1][j0]
+        f11 = self.grid[i1][j1]
+        lon0 = longitudes[j0]
+        lon1 = longitudes[j1]
+        lat0 = latitudes[i0]
+        lat1 = latitudes[i1]
+        tx = 0.0 if lon1 == lon0 else (lon - lon0) / (lon1 - lon0)
+        ty = 0.0 if lat1 == lat0 else (lat - lat0) / (lat1 - lat0)
+        f0 = f00 + tx * (f01 - f00)
+        f1 = f10 + tx * (f11 - f10)
+        return f0 + ty * (f1 - f0)
+
+    @staticmethod
+    def _lerp(a: float, b: float, x0: float, x1: float, x: float) -> float:
+        if x1 == x0:
+            return a
+        t = (x - x0) / (x1 - x0)
+        return a + t * (b - a)
+
+    @staticmethod
+    def _normalize_lon(lon: float) -> float:
+        while lon > 180.0:
+            lon -= 360.0
+        while lon < -180.0:
+            lon += 360.0
+        return lon
+
+    def _load_grid(self, pos_path: str, flux_path: str) -> Tuple[List[float], List[float], List[List[float]]]:
+        pos_lines = Path(pos_path).read_text(encoding="utf-8", errors="ignore").splitlines()
+        flux_lines = Path(flux_path).read_text(encoding="utf-8", errors="ignore").splitlines()
+        pos_start = self._find_data_start(pos_lines, "Universal Time")
+        flux_start = self._find_data_start(flux_lines, "Flux")
+
+        pos_rows = self._parse_rows(pos_lines[pos_start:], 5)
+        flux_rows = self._parse_rows(flux_lines[flux_start:], 3)
+        flux_values = [row[2] for row in flux_rows]
+
+        if len(pos_rows) != len(flux_values):
+            raise RuntimeError(f"SPENVIS grid mismatch: {len(pos_rows)} positions vs {len(flux_values)} flux values")
+
+        latitudes: List[float] = []
+        longitudes: List[float] = []
+        grid: List[List[float]] = []
+        current_lat = None
+        row_values: List[float] = []
+        row_lons: List[float] = []
+
+        for (alt, lat, lon, _, _), flux in zip(pos_rows, flux_values):
+            if current_lat is None or not np.isclose(lat, current_lat):
+                if row_values:
+                    if not longitudes:
+                        longitudes = row_lons
+                    elif len(row_lons) != len(longitudes) or not np.allclose(row_lons, longitudes):
+                        raise RuntimeError("SPENVIS grid longitude rows mismatch")
+                    grid.append(row_values)
+                    row_values = []
+                    row_lons = []
+                current_lat = lat
+                latitudes.append(lat)
+            row_values.append(flux)
+            row_lons.append(lon)
+
+        if row_values:
+            if not longitudes:
+                longitudes = row_lons
+            elif len(row_lons) != len(longitudes) or not np.allclose(row_lons, longitudes):
+                raise RuntimeError("SPENVIS grid longitude rows mismatch")
+            grid.append(row_values)
+
+        if latitudes and latitudes[0] > latitudes[-1]:
+            latitudes.reverse()
+            grid.reverse()
+        if longitudes and longitudes[0] > longitudes[-1]:
+            longitudes.reverse()
+            grid = [list(reversed(row)) for row in grid]
+
+        return latitudes, longitudes, grid
+
+    @staticmethod
+    def _find_data_start(lines: List[str], marker: str) -> int:
+        for idx, line in enumerate(lines):
+            if marker in line:
+                return idx + 1
+        return 0
+
+    @staticmethod
+    def _parse_rows(lines: List[str], cols: int) -> List[List[float]]:
+        rows: List[List[float]] = []
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith(("*", "'")):
+                continue
+            parts = [p.strip() for p in line.split(",")]
+            if len(parts) < cols:
+                continue
+            try:
+                rows.append([float(p) for p in parts[:cols]])
+            except ValueError:
+                continue
+        return rows
+
+
 class FluxService:
     def __init__(self, cfg: FluxConfig):
         self.cfg = cfg
         self.model = self._build_model(cfg)
-        self.model_name = "ae9ap9" if isinstance(self.model, AE9AP9Model) else "mock"
+        if isinstance(self.model, AE9AP9Model):
+            self.model_name = "ae9ap9"
+        elif isinstance(self.model, AP8AE8Model):
+            self.model_name = "ap8ae8"
+        else:
+            self.model_name = "mock"
 
     def _build_model(self, cfg: FluxConfig) -> FluxModel:
         if cfg.model == "mock":
             return MockFluxModel(cfg.mock_profile)
+        if cfg.model == "ap8ae8":
+            return AP8AE8Model(cfg.ap8ae8)
         channels = cfg.energy_channels if isinstance(cfg.energy_channels, list) else list(cfg.energy_channels.values())
         if not cfg.ae9ap9.executable or not cfg.ae9ap9.command_template:
             # Safe fallback to mock when AE9/AP9 CLI is not configured.
@@ -158,6 +322,9 @@ class FluxService:
         percentile: str,
         altitudes_km: List[float],
     ) -> Tuple[List[float], List[float], List[List[List[float]]]]:
+        if isinstance(self.model, AP8AE8Model):
+            lats, lons, grid = self.model.grid_values(channel)
+            return lats, lons, [grid]
         cfg = self.cfg.ae9ap9
         t_bucketed = self._time_bucket(t, cfg.time_bucket_sec)
         latitudes = list(np.arange(-90.0, 90.0 + cfg.grid_lat_step_deg, cfg.grid_lat_step_deg))

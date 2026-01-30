@@ -17,14 +17,11 @@ tle_quality:
     stability: 0.3
     propagation: 0.3
 flux:
-  model: ae9ap9
+  model: ap8ae8
   percentile_default: mean
   percentile_on_trigger: p95
   energy_channels:
-  - Je>100keV
-  - Je>1MeV
-  - Jp>10MeV
-  - Jp>50MeV
+  - Je>0.1MeV
   mock_profile:
     quiet_altitude_km: 800.0
     storm_altitude_km: 1200.0
@@ -48,12 +45,17 @@ flux:
     - 1000.0
     grid_mode: 2d
     default_alt_km: 600.0
+  ap8ae8:
+    pos_path: spenvis_pos.txt
+    flux_path: spenvis_tpo.txt
+    channel: Je>0.1MeV
+    alt_km: 550.0
+    grid_lat_step_deg: 2.0
+    grid_lon_step_deg: 3.0
+    default_alt_km: 550.0
 decision:
   risk_weights:
-    Je>100keV: 0.4
-    Je>1MeV: 0.3
-    Jp>10MeV: 0.2
-    Jp>50MeV: 0.1
+    Je>0.1MeV: 1.0
   r_off: 4.2
   r_on: 3.0
   hold_time_sec: 20

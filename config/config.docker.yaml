@@ -48,6 +48,14 @@ flux:
     - 1000.0
     grid_mode: 2d
     default_alt_km: 600.0
+  ap8ae8:
+    pos_path: spenvis_pos.txt
+    flux_path: spenvis_tpo.txt
+    channel: Je>0.1MeV
+    alt_km: 550.0
+    grid_lat_step_deg: 2.0
+    grid_lon_step_deg: 3.0
+    default_alt_km: 550.0
 decision:
   risk_weights:
     Je>100keV: 0.4

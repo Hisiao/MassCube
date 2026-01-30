@@ -303,7 +303,8 @@ export default function App() {
 
   const refreshGrid = async (now: Date) => {
     if (!configResp || !fluxChannel) return;
-    const alt = configResp.config.flux.ae9ap9?.default_alt_km;
+    const fluxCfg = configResp.config.flux;
+    const alt = fluxCfg.model === "ap8ae8" ? fluxCfg.ap8ae8?.default_alt_km : fluxCfg.ae9ap9?.default_alt_km;
     try {
       const grid = await getFluxGrid(toIso(now), fluxChannel, configResp.config.flux.percentile_default, alt);
       setFluxGrid(grid);

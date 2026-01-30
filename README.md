@@ -5,7 +5,7 @@ MASS-Cube 是一个端到端的航天任务演示系统，串联“卫星轨道 
 
 项目的技术亮点包括：
 - 服务分层清晰：TLE、轨道、通量、决策各自独立，便于替换数据源或模型。
-- 配置驱动并可回滚：`config/config.yaml` 支持通过 API 更新并记录版本历史。
+- 配置驱动并可追溯：`config/config.yaml` 支持通过 API 更新并记录版本历史；回滚能力在 `ConfigStore` 中实现，但当前未暴露 API。
 - 模型可降级：AE9/AP9 CLI 未配置时自动回退到 mock 通量模型。
 - 结果可交付：支持导出未来观测计划 CSV（/decision/plan/export）。
 
@@ -34,7 +34,7 @@ MASS-Cube 是一个端到端的航天任务演示系统，串联“卫星轨道 
 - 业务服务层：
   - `TLEService` 定期拉取 TLE 并进行质量评估，保存到 SQLite。
   - `OrbitService` 使用 SGP4 推进轨道并输出地理坐标与轨道质量。
-  - `FluxService` 基于轨道点计算通量序列或网格（mock 或 AE9/AP9 CLI）。
+- `FluxService` 基于轨道点计算通量序列或网格（mock、AE9/AP9 CLI 或 AP8/AE8 SPENVIS 网格）。
   - `DecisionService` 将通量转为风险并生成观测开/关窗口。
 - API 层：`app/main.py` 提供状态、轨迹、通量、决策窗口与观测计划导出等接口，并在启动时启动 TLE 刷新与缓存清理循环。
 - 前端层：`frontend/src/App.tsx` 定时轮询后端，生成风险序列与轨迹分段渲染，并叠加通量热力图。
@@ -51,7 +51,7 @@ MASS-Cube/
     services/
       tle_service.py        # TLE 拉取、质量评估与 SQLite 存储
       orbit_service.py      # SGP4 推进与坐标转换
-      flux_service.py       # 通量模型（mock / AE9AP9 CLI）
+      flux_service.py       # 通量模型（mock / AE9AP9 CLI / AP8AE8 SPENVIS）
       decision_service.py   # 风险计算与开关窗口
     tools/
       irene_cli.py          # IRENE CLI 适配器

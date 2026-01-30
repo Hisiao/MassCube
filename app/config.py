@@ -82,6 +82,16 @@ class AE9AP9CLIConfig(BaseModel):
         return v
 
 
+class AP8AE8Config(BaseModel):
+    pos_path: str = "spenvis_pos.txt"
+    flux_path: str = "spenvis_tpo.txt"
+    channel: str = "Je>0.1MeV"
+    alt_km: float = 550.0
+    grid_lat_step_deg: float = 2.0
+    grid_lon_step_deg: float = 3.0
+    default_alt_km: float = 550.0
+
+
 class FluxConfig(BaseModel):
     model: str = "mock"
     percentile_default: str = "mean"
@@ -91,12 +101,13 @@ class FluxConfig(BaseModel):
     )
     mock_profile: FluxMockProfile = FluxMockProfile()
     ae9ap9: AE9AP9CLIConfig = Field(default_factory=AE9AP9CLIConfig)
+    ap8ae8: AP8AE8Config = Field(default_factory=AP8AE8Config)
 
     @field_validator("model")
     @classmethod
     def validate_model(cls, v: str) -> str:
-        if v not in {"mock", "ae9ap9"}:
-            raise ValueError("flux.model must be 'mock' or 'ae9ap9'")
+        if v not in {"mock", "ae9ap9", "ap8ae8"}:
+            raise ValueError("flux.model must be 'mock', 'ae9ap9', or 'ap8ae8'")
         return v
 
 

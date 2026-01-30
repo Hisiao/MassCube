@@ -204,11 +204,15 @@ async def flux_grid(
 ) -> FluxGrid:
     t = _parse_time(time)
     pct = percentile or config_store.config.flux.percentile_default
-    cfg = config_store.config.flux.ae9ap9
-    if cfg.grid_mode == "3d":
-        altitudes = cfg.grid_alt_layers_km
+    flux_cfg = config_store.config.flux
+    if flux_cfg.model == "ap8ae8":
+        altitudes = [flux_cfg.ap8ae8.default_alt_km]
     else:
-        altitudes = [alt_km if alt_km is not None else cfg.default_alt_km]
+        cfg = flux_cfg.ae9ap9
+        if cfg.grid_mode == "3d":
+            altitudes = cfg.grid_alt_layers_km
+        else:
+            altitudes = [alt_km if alt_km is not None else cfg.default_alt_km]
     lats, lons, values = flux_service.compute_grid(t, channel, pct, altitudes)
     return FluxGrid(
         t=t,
